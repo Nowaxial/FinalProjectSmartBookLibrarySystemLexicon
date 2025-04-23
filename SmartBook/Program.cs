@@ -1,10 +1,13 @@
-﻿namespace SmartBook
+﻿using System.Text;
+
+namespace SmartBook
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, SmartBook!");
+            Console.OutputEncoding = Encoding.UTF8;
+            UIHelpers.MainMenu();
         }
     }
 }
