@@ -8,27 +8,27 @@ namespace SmartBook
 {
     public class UIHelpers
     {
-        private static void DisplaySuccess(string message)
+        public static void DisplaySuccess(string message)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"\n✓ {message}");
             Console.ResetColor();
         }
 
-        private static void DisplayError(string message)
+        public static void DisplayError(string message)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"\n⛔ {message}");
             Console.ResetColor();
         }
-        private static void DisplayWarning(string message)
+        public static void DisplayWarning(string message)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"\n⚠ {message}");
             Console.ResetColor();
         }
 
-        private static void PauseExecution(string message = "\n Tryck <Enter> för att fortsätta...")
+        public static void PauseExecution(string message = "\n Tryck <Enter> för att fortsätta...")
         {
             Console.WriteLine(message);
             while (Console.ReadKey().Key != ConsoleKey.Enter)
@@ -137,7 +137,7 @@ namespace SmartBook
                 catch (Exception ex)  // CATCH-BLOCK - Här hamnar alla exceptions
 
                 {
-                    DisplayError($"Operation failed: {ex.Message}");
+                    DisplayError($"Fel vid inläsning: {ex.Message}");
                 }
             }
         }
