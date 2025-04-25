@@ -8,6 +8,7 @@ namespace SmartBook
 {
     public class UIHelpers
     {
+        public static Library library = new();
         public static void DisplaySuccess(string message)
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -24,7 +25,7 @@ namespace SmartBook
         public static void DisplayWarning(string message)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"\n⚠ {message}");
+            Console.WriteLine($"\n⚠  {message}");
             Console.ResetColor();
         }
 
@@ -49,16 +50,34 @@ namespace SmartBook
             Console.Write(prompt);
             return Console.ReadLine()?.Trim() ?? "";
         }
-
-        private static bool CheckForExit(string input)
+        private static string GetValidatedIsbn()
         {
-            if (input?.ToLower() != "exit")
+            string isbn;
+            bool isValid;
+            do
             {
-                return false;
-            }
+                isbn = GetUserInput("ISBN: ");
+                isValid = Book.IsValidIsbn(isbn);
+                if (!isValid)
+                {
+                    DisplayError("Ogiltigt ISBN. Måste vara minst 10 siffror eller bindestreck.");
+                }
+            } while (!isValid);
+            return isbn;
+        }
 
-            ReturnToMainMenu();
-            return true;
+        private static string GetValidatedInput(string prompt, string errorMessage)
+        {
+            string input;
+            do
+            {
+                input = GetUserInput(prompt);
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    DisplayError(errorMessage);
+                }
+            } while (string.IsNullOrWhiteSpace(input));
+            return input;
         }
 
         public static void MainMenu()
@@ -66,13 +85,9 @@ namespace SmartBook
             while (true)
             {
                 MenuHelpers.MainMenuUI();
-
-                string input = GetUserInput("\nVal: ");
-                if (CheckForExit(input)) continue;
-
-                // TRY-BLOCK - Här börjar exceptionhanteringen
                 try
                 {
+                    string input = GetUserInput("\nVal: ");
                     switch (input)
                     {
                         case "0":
@@ -81,17 +96,14 @@ namespace SmartBook
 
                         case "1":
                             AddBook();
-                            PauseExecution();
                             break;
 
                         case "2":
                             RemoveBook();
-                            PauseExecution();
                             break;
 
                         case "3":
                             ListAllBooks();
-                            PauseExecution();
                             break;
 
                         case "4":
@@ -115,17 +127,73 @@ namespace SmartBook
                             break;
                     }
                 }
-                catch (Exception ex)  // CATCH-BLOCK - Här hamnar alla exceptions
-
+                catch (Exception ex)
                 {
                     DisplayError($"Fel vid inläsning: {ex.Message}");
                 }
             }
         }
 
-        private static void ToggleBorrowStatus()
+        private static void AddBook()
         {
-            MenuHelpers.ToggleBorrowStatusUI();
+            MenuHelpers.AddBookUI();
+
+            string title = GetValidatedInput("Titel: ", "Titel får inte vara tom");
+            string author = GetValidatedInput("Författare: ", "Författare får inte vara tom");
+            string category = GetValidatedInput("Kategori: ", "Kategori får inte vara tom");
+            string isbn = GetValidatedIsbn();
+
+            try
+            {
+                var book = new Book(title, author, isbn, category);
+                if (library.AddBook(book))
+                {
+                    DisplaySuccess("Boken har lagts till!");
+                }
+            }
+            catch (Exception ex)
+            {
+                DisplayError(ex.Message);
+            }
+            finally
+            {
+                PauseExecution();
+            }
+        }
+        private static void RemoveBook()
+        {
+            MenuHelpers.RemoveBookUI();
+        }
+
+        private static void ListAllBooks()
+        {
+            var books = library.GetAllBooksSorted();
+            MenuHelpers.ListAllBooksUI();
+            try
+            {
+                if (!books.Any())
+                {
+                    DisplayWarning("Inga böcker hittades.");
+                }
+                else
+                {
+
+                    foreach (var book in books)
+                    {
+                        Console.WriteLine(book.ToString());
+                    }
+                }
+
+                Console.WriteLine($"\nTotalt: {library.Books.Count} böcker");
+            }
+            catch (Exception ex)
+            {
+                DisplayError($"Fel: {ex.Message}");
+            }
+            finally
+            {
+                PauseExecution();
+            }
         }
 
         private static void SearchAllBooks()
@@ -133,20 +201,9 @@ namespace SmartBook
             MenuHelpers.SearchAllBooksUI();
         }
 
-        private static void ListAllBooks()
+        private static void ToggleBorrowStatus()
         {
-            MenuHelpers.ListAllBooksUI();
-        }
-
-        private static void RemoveBook()
-        {
-            MenuHelpers.RemoveBookUI();
-        }
-
-        private static void AddBook()
-        {
-            MenuHelpers.AddBookUI();
+            MenuHelpers.ToggleBorrowStatusUI();
         }
     }
-
 }

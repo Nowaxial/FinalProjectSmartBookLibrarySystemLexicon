@@ -19,7 +19,12 @@ namespace SmartBook
 
         public override string ToString()
         {
-            return $"{Title} av {Author} med ISBN: {ISBN} i kategori : {Category} | Status: [{(IsBorrowed ? "Utlånad" : "Tillgänglig")}]";
+            return $"📖 Titel: {Title}\n   👤 Författare: {Author}\n   🏷️ Kategori: {Category}\n   🔢 ISBN: {ISBN}\n   {(IsBorrowed ? "🔴 UTLÅNAD" : "🟢 TILLGÄNGLIG")}";
+        }
+        public static bool IsValidIsbn(string isbn)
+        {
+            if (string.IsNullOrWhiteSpace(isbn)) return false;
+            return isbn.Length >= 10 && isbn.All(c => char.IsDigit(c) || c == '-');
         }
     }
 }

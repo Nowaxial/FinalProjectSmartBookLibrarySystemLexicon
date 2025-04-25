@@ -15,11 +15,16 @@ namespace SmartBook
             Books = [];
         }
 
-        public void AddBook(Book book)
+        public bool AddBook(Book book)
         {
             if (Books.Any(b => b.ISBN == book.ISBN))
-                UIHelpers.DisplayWarning($"En bok med samma ISBN: '{book.ISBN}' finns redan! ");
+            {
+                UIHelpers.DisplayWarning($"En bok med samma ISBN: '{book.ISBN}' finns redan!");
+                return false;  // Returnera false för att indikera misslyckande
+            }
+
             Books.Add(book);
+            return true;  // Returnera true för att indikera lyckat tillägg
         }
         public bool RemoveBook(string identifier)
         {
