@@ -41,6 +41,7 @@ namespace SmartBook
         {
             Console.WriteLine("Åter till huvudmenyn....");
             Thread.Sleep(1250);
+            return;
         }
 
         private static string GetUserInput(string prompt)
@@ -62,24 +63,9 @@ namespace SmartBook
 
         public static void MainMenu()
         {
-
-
             while (true)
             {
-                Console.Clear();
-                Console.WriteLine("SmartBook - Bibliotekssystem\n");
-
-                Console.WriteLine("╔══════════════════════════════════╗");
-                Console.WriteLine("║   SmartBook - Bibliotekssystem   ║");
-                Console.WriteLine("╠══════════════════════════════════╣");
-                Console.WriteLine("║ 1. Lägg till bok                 ║");
-                Console.WriteLine("║ 2. Ta bort bok                   ║");
-                Console.WriteLine("║ 3. Visa alla böcker              ║");
-                Console.WriteLine("║ 4. Sök bok                       ║");
-                Console.WriteLine("║ 5. Ändra lånestatus              ║");
-                Console.WriteLine("║ 6. Spara bibliotek               ║");
-                Console.WriteLine("║ 0. Avsluta                       ║");
-                Console.WriteLine("╚══════════════════════════════════╝");
+                MenuHelpers.MainMenuUI();
 
                 string input = GetUserInput("\nVal: ");
                 if (CheckForExit(input)) continue;
@@ -94,33 +80,28 @@ namespace SmartBook
                             break;
 
                         case "1":
-                            DisplayWarning("");
+                            AddBook();
                             PauseExecution();
-                            //AddBook();
                             break;
 
                         case "2":
-                            DisplayWarning("");
+                            RemoveBook();
                             PauseExecution();
-                            //RemoveBook();
                             break;
 
                         case "3":
-                            DisplayWarning("");
+                            ListAllBooks();
                             PauseExecution();
-                            //ListAllBooks();
                             break;
 
                         case "4":
-                            DisplayWarning("");
+                            SearchAllBooks();
                             PauseExecution();
-                            //SearchAllBooks();
                             break;
 
                         case "5":
-                            DisplayWarning("");
+                            ToggleBorrowStatus();
                             PauseExecution();
-                            //ToggleBorrowStatus();
                             break;
 
                         case "6":
@@ -129,7 +110,7 @@ namespace SmartBook
                             break;
 
                         default:
-                            DisplayError($"Felaktigt val: '{input}' | Välj mellan 1-4 eller 0 för att avsluta");
+                            DisplayError($"Felaktigt val: '{input}' | Välj mellan 1-6 eller 0 för att avsluta");
                             PauseExecution();
                             break;
                     }
@@ -140,6 +121,31 @@ namespace SmartBook
                     DisplayError($"Fel vid inläsning: {ex.Message}");
                 }
             }
+        }
+
+        private static void ToggleBorrowStatus()
+        {
+            MenuHelpers.ToggleBorrowStatusUI();
+        }
+
+        private static void SearchAllBooks()
+        {
+            MenuHelpers.SearchAllBooksUI();
+        }
+
+        private static void ListAllBooks()
+        {
+            MenuHelpers.ListAllBooksUI();
+        }
+
+        private static void RemoveBook()
+        {
+            MenuHelpers.RemoveBookUI();
+        }
+
+        private static void AddBook()
+        {
+            MenuHelpers.AddBookUI();
         }
     }
 

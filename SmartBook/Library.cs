@@ -9,13 +9,17 @@ namespace SmartBook
 {
     public class Library
     {
-        public List<Book> Books { get; private set; } = [];
+        public List<Book> Books;
+        public Library()
+        {
+            Books = [];
+        }
 
-        public void AddBook(Book book) 
+        public void AddBook(Book book)
         {
             if (Books.Any(b => b.ISBN == book.ISBN))
                 UIHelpers.DisplayWarning($"En bok med samma ISBN: '{book.ISBN}' finns redan! ");
-            Books.Add(book); 
+            Books.Add(book);
         }
         public bool RemoveBook(string identifier)
         {
@@ -29,15 +33,14 @@ namespace SmartBook
 
         public List<Book> GetAllBooksSorted()
         {
-            return Books.OrderBy(b => b.Title).ToList();
+            return [.. Books.OrderBy(b => b.Title)];
         }
 
         public List<Book> Search(string query)
         {
-            return Books.Where(b =>
+            return [.. Books.Where(b =>
             b.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-            b.Author.Contains(query, StringComparison.OrdinalIgnoreCase))
-            .ToList();
+            b.Author.Contains(query, StringComparison.OrdinalIgnoreCase))];
         }
         public void SaveToFile(string filePath)
         {
@@ -45,12 +48,12 @@ namespace SmartBook
             File.WriteAllText(filePath, json);
         }
 
-        public void LoadFromFile(string filePath) 
+        public void LoadFromFile(string filePath)
         {
-            if (!File.Exists(filePath)) 
+            if (!File.Exists(filePath))
             {
                 var json = File.ReadAllText(filePath);
-                Books = JsonSerializer.Deserialize<List <Book>>(json) ?? [];
+                Books = JsonSerializer.Deserialize<List<Book>>(json) ?? [];
             }
         }
     }
