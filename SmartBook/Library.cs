@@ -45,7 +45,8 @@ namespace SmartBook
         {
             return [.. Books.Where(b =>
             b.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-            b.Author.Contains(query, StringComparison.OrdinalIgnoreCase))];
+            b.Author.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+            b.ISBN.Contains(query, StringComparison.OrdinalIgnoreCase))];
         }
         public void SaveToFile(string filePath)
         {

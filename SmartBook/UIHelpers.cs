@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -108,7 +109,6 @@ namespace SmartBook
 
                         case "4":
                             SearchAllBooks();
-                            PauseExecution();
                             break;
 
                         case "5":
@@ -168,19 +168,33 @@ namespace SmartBook
         private static void ListAllBooks()
         {
             var books = library.GetAllBooksSorted();
+
+            const int titleWidth = 25;
+            const int authorWidth = 25;
+            const int isbnWidth = 20;
+            const int categoryWidth = 15;
+            const int statusWidth = 12;
+
             MenuHelpers.ListAllBooksUI();
             try
             {
-                if (!books.Any())
+                if (books.Count == 0)
                 {
                     DisplayWarning("Inga böcker hittades.");
                 }
                 else
                 {
+                    Console.WriteLine(
+                        $"{"Titel".PadRight(titleWidth)} " +
+                        $"{"Författare".PadRight(authorWidth)} " +
+                        $"{"ISBN".PadRight(isbnWidth)} " +
+                        $"{"Kategori".PadRight(categoryWidth)} " +
+                        $"{"Status".PadRight(statusWidth)}");
+                    Console.WriteLine(new string('─', titleWidth + authorWidth + isbnWidth + categoryWidth+ statusWidth + 3));
 
                     foreach (var book in books)
                     {
-                        Console.WriteLine(book.ToString());
+                        Console.WriteLine($"{book.ToString()}");
                     }
                 }
 
@@ -199,6 +213,43 @@ namespace SmartBook
         private static void SearchAllBooks()
         {
             MenuHelpers.SearchAllBooksUI();
+
+            var query = GetUserInput("Sök på författare, titel eller ISBN: ");
+            var results = library.Search(query);
+
+            try
+            {
+                if (results.Count == 0)
+                {
+                    DisplayWarning("Inga böcker hittades.");
+                }
+                else {
+                    Console.WriteLine($"\nSökresultat: ({results.Count})\n");
+
+                    Console.WriteLine(
+                        $"{"Titel".PadRight(25)} " +
+                        $"{"Författare".PadRight(25)} " +
+                        $"{"ISBN".PadRight(25)} ");
+                    Console.WriteLine(new string('─', 25 + 25 + 15));
+
+                    foreach (var book in results)
+                    {
+                        Console.WriteLine($"{book.ToSearchString()}");
+
+                    }
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                DisplayError($"Fel: {ex.Message}");
+            }
+            finally
+            {
+                PauseExecution();
+            }
         }
 
         private static void ToggleBorrowStatus()
