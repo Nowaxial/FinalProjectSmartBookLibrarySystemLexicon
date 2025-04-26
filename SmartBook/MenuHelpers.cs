@@ -19,7 +19,8 @@ namespace SmartBook
             Console.WriteLine("║ 3. Visa alla böcker              ║");
             Console.WriteLine("║ 4. Sök bok                       ║");
             Console.WriteLine("║ 5. Ändra lånestatus              ║");
-            Console.WriteLine("║ 6. Spara bibliotek               ║");
+            Console.WriteLine("║ 6. Spara bibliotek till fil      ║");
+            Console.WriteLine("║ 7. Ladda bibliotek från fil      ║");
             Console.WriteLine("║ 0. Avsluta                       ║");
             Console.WriteLine("╚══════════════════════════════════╝");
         }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,6 +11,8 @@ namespace SmartBook
     public class UIHelpers
     {
         public static Library library = new();
+
+        const string filePath = "library.json";
         public static void DisplaySuccess(string message)
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -30,7 +33,7 @@ namespace SmartBook
             Console.ResetColor();
         }
 
-        public static void PauseExecution(string message = "\n Tryck <Enter> för att fortsätta...")
+        public static void PauseExecution(string message = "Tryck <Enter> för att fortsätta...")
         {
             Console.WriteLine(message);
             while (Console.ReadKey().Key != ConsoleKey.Enter)
@@ -116,8 +119,11 @@ namespace SmartBook
                             break;
 
                         case "6":
-                            DisplayWarning("");
-                            PauseExecution();
+                            library.SaveToFile(filePath);
+                            break;
+
+                        case "7":
+                            library.LoadFromFile(filePath);
                             break;
 
                         default:
@@ -139,7 +145,7 @@ namespace SmartBook
 
             while (continueAdding)
             {
-                
+
                 MenuHelpers.AddBookUI();
 
                 // Hämta input
@@ -156,14 +162,14 @@ namespace SmartBook
                         DisplaySuccess("Boken har lagts till!");
                     }
 
-                    
+
                     while (true)
                     {
                         string response = GetUserInput("Vill du lägga till fler böcker? (j)a/(n)ej: ").ToLower();
 
                         if (response == "j" || response == "ja")
                         {
-                            break; 
+                            break;
                         }
                         else if (response == "n" || response == "nej")
                         {
@@ -185,8 +191,8 @@ namespace SmartBook
                 {
                     if (continueAdding)
                     {
-                        
-                       PauseExecution();
+
+                        PauseExecution();
                     }
                 }
             }
@@ -221,7 +227,7 @@ namespace SmartBook
                         $"{"ISBN".PadRight(isbnWidth)} " +
                         $"{"Kategori".PadRight(categoryWidth)} " +
                         $"{"Status".PadRight(statusWidth)}");
-                    Console.WriteLine(new string('─', titleWidth + authorWidth + isbnWidth + categoryWidth+ statusWidth + 3));
+                    Console.WriteLine(new string('─', titleWidth + authorWidth + isbnWidth + categoryWidth + statusWidth + 3));
 
                     foreach (var book in books)
                     {
@@ -254,7 +260,8 @@ namespace SmartBook
                 {
                     DisplayWarning("Inga böcker hittades.");
                 }
-                else {
+                else
+                {
                     Console.WriteLine($"\nSökresultat: ({results.Count})\n");
 
                     Console.WriteLine(

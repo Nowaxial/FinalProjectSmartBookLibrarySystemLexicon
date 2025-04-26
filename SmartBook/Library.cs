@@ -38,7 +38,7 @@ namespace SmartBook
 
         public List<Book> GetAllBooksSorted()
         {
-            return [.. Books.OrderBy(b => b.Title)];
+            return [.. Books.OrderBy(b => b.Title).ThenBy(b => b.Author)];
         }
 
         public List<Book> Search(string query)
@@ -50,16 +50,68 @@ namespace SmartBook
         }
         public void SaveToFile(string filePath)
         {
-            var json = JsonSerializer.Serialize(Books);
-            File.WriteAllText(filePath, json);
+            try
+            {
+                // Ladda först befintliga böcker från filen
+                List<Book> existingBooks = [];
+                if (File.Exists(filePath))
+                {
+                    var existingJson = File.ReadAllText(filePath);
+                    existingBooks = JsonSerializer.Deserialize<List<Book>>(existingJson) ?? [];
+                }
+
+                // Slå samman och ta bort dubbletter
+                var allBooks = Books.UnionBy(existingBooks, b => b.ISBN).ToList();
+
+                // Spara den kombinerade listan
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                var json = JsonSerializer.Serialize(allBooks, options);
+                File.WriteAllText(filePath, json);
+
+                Console.WriteLine($"📚 Sparade {allBooks.Count} bok/böcker till biblioteket");
+            }
+            catch (Exception ex)
+            {
+                UIHelpers.DisplayError($"Fel: {ex.Message}");
+            }
+            finally {
+                Thread.Sleep(3000);
+            }
         }
 
         public void LoadFromFile(string filePath)
         {
-            if (!File.Exists(filePath))
+            try
             {
-                var json = File.ReadAllText(filePath);
-                Books = JsonSerializer.Deserialize<List<Book>>(json) ?? [];
+                if (File.Exists(filePath))
+                {
+                    var json = File.ReadAllText(filePath);
+                    var loadedBooks = JsonSerializer.Deserialize<List<Book>>(json) ?? [];
+
+                    // Lägg till de laddade böckerna till den befintliga listan
+                    foreach (var book in loadedBooks)
+                    {
+                        if (!Books.Any(b => b.ISBN == book.ISBN)) // Undvik dubbletter
+                        {
+                            Books.Add(book);
+                        }
+                    }
+
+                    UIHelpers.DisplaySuccess($"📚 Laddade {loadedBooks.Count} bok/böcker från biblioteket");
+                    Console.WriteLine($"Totalt antal böcker i biblioteket: {Books.Count}");
+                }
+                else
+                {
+                    UIHelpers.DisplayWarning("Ingen sparad fil hittades - fortsätter med nuvarande bibliotek");
+                }
+            }
+            catch (Exception ex)
+            {
+                UIHelpers.DisplayError($"Kunde inte ladda från fil: {ex.Message}");
+            }
+            finally
+            {
+                Thread.Sleep(3000);
             }
         }
     }
