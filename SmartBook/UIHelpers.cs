@@ -43,7 +43,6 @@ namespace SmartBook
         {
             Console.WriteLine("Åter till huvudmenyn....");
             Thread.Sleep(1250);
-            return;
         }
 
         private static string GetUserInput(string prompt)
@@ -136,28 +135,60 @@ namespace SmartBook
 
         private static void AddBook()
         {
-            MenuHelpers.AddBookUI();
+            bool continueAdding = true;
 
-            string title = GetValidatedInput("Titel: ", "Titel får inte vara tom");
-            string author = GetValidatedInput("Författare: ", "Författare får inte vara tom");
-            string category = GetValidatedInput("Kategori: ", "Kategori får inte vara tom");
-            string isbn = GetValidatedIsbn();
-
-            try
+            while (continueAdding)
             {
-                var book = new Book(title, author, isbn, category);
-                if (library.AddBook(book))
+                
+                MenuHelpers.AddBookUI();
+
+                // Hämta input
+                string title = GetValidatedInput("Titel: ", "Titel får inte vara tom");
+                string author = GetValidatedInput("Författare: ", "Författare får inte vara tom");
+                string category = GetValidatedInput("Kategori: ", "Kategori får inte vara tom");
+                string isbn = GetValidatedIsbn();
+
+                try
                 {
-                    DisplaySuccess("Boken har lagts till!");
+                    var book = new Book(title, author, isbn, category);
+                    if (library.AddBook(book))
+                    {
+                        DisplaySuccess("Boken har lagts till!");
+                    }
+
+                    
+                    while (true)
+                    {
+                        string response = GetUserInput("Vill du lägga till fler böcker? (j)a/(n)ej: ").ToLower();
+
+                        if (response == "j" || response == "ja")
+                        {
+                            break; 
+                        }
+                        else if (response == "n" || response == "nej")
+                        {
+                            continueAdding = false;
+                            ReturnToMainMenu();
+                            return;
+                        }
+                        else
+                        {
+                            DisplayError("Ogiltigt val. Ange 'j' för ja eller 'n' för nej.");
+                        }
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                DisplayError(ex.Message);
-            }
-            finally
-            {
-                PauseExecution();
+                catch (Exception ex)
+                {
+                    DisplayError($"Fel: {ex.Message}");
+                }
+                finally
+                {
+                    if (continueAdding)
+                    {
+                        
+                       PauseExecution();
+                    }
+                }
             }
         }
         private static void RemoveBook()
