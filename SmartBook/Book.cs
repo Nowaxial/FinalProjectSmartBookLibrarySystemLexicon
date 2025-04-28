@@ -40,5 +40,10 @@ namespace SmartBook
                 Author,
                 ISBN);
         }
+
+        public string ToRemoveString()
+        {
+            return string.Format("{0,-25}{1,-20}{2,-12}", Title, ISBN, IsBorrowed ? "🔴 Utlånad" : "🟢 Tillgänglig");
+        }
     }
 }

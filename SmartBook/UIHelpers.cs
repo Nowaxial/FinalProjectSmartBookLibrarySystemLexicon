@@ -115,11 +115,10 @@ namespace SmartBook
 
                         case "5":
                             ToggleBorrowStatus();
-                            PauseExecution();
                             break;
 
                         case "6":
-                            library.SaveToFile(filePath);
+                            SaveToLibrary();
                             break;
 
                         case "7":
@@ -145,14 +144,26 @@ namespace SmartBook
 
             while (continueAdding)
             {
-
                 MenuHelpers.AddBookUI();
 
                 // Hämta input
                 string title = GetValidatedInput("Titel: ", "Titel får inte vara tom");
                 string author = GetValidatedInput("Författare: ", "Författare får inte vara tom");
                 string category = GetValidatedInput("Kategori: ", "Kategori får inte vara tom");
-                string isbn = GetValidatedIsbn();
+
+                // Hämta ISBN och kontrollera att det inte redan finns
+                string isbn;
+                bool isbnExists;
+                do
+                {
+                    isbn = GetValidatedIsbn();
+                    isbnExists = library.Books.Any(b => b.ISBN.Equals(isbn, StringComparison.OrdinalIgnoreCase));
+
+                    if (isbnExists)
+                    {
+                        UIHelpers.DisplayWarning($"En bok med ISBN '{isbn}' finns redan. Ange ett nytt ISBN.");
+                    }
+                } while (isbnExists);
 
                 try
                 {
@@ -161,7 +172,6 @@ namespace SmartBook
                     {
                         DisplaySuccess("Boken har lagts till!");
                     }
-
 
                     while (true)
                     {
@@ -191,7 +201,6 @@ namespace SmartBook
                 {
                     if (continueAdding)
                     {
-
                         PauseExecution();
                     }
                 }
@@ -200,6 +209,46 @@ namespace SmartBook
         private static void RemoveBook()
         {
             MenuHelpers.RemoveBookUI();
+
+            var availableBooks = library.Books.Where(b => !b.IsBorrowed!).ToList();
+
+            if (availableBooks.Count == 0)
+            {
+                DisplayWarning("Inga böcker finns att ta bort");
+                PauseExecution();
+                return;
+            }
+
+            MenuHelpers.RemoveBookUI();
+
+            Console.WriteLine("\nTillgängliga böcker:\n");
+
+            Console.WriteLine(
+                        $"{"Titel".PadRight(25)} " +
+                        $"{"ISBN".PadRight(20)} " +
+                        $"{"Status".PadRight(12)}");
+            Console.WriteLine(new string('─', 25 + 20 + 12 + 3));
+
+            foreach (var book in availableBooks)
+            {
+                Console.WriteLine($" {book.ToRemoveString()}");
+            }
+
+            string identifier = GetUserInput("\nAnge boktitel eller ISBN att ta bort: ");
+
+            if (library.RemoveBook(identifier, filePath))
+            {
+
+                DisplaySuccess("Boken har tagits bort från biblioteket");
+            }
+            else
+            {
+                DisplayError("Kunde inte hitta boken eller den är utlånad");
+            }
+
+            PauseExecution();
+
+
         }
 
         private static void ListAllBooks()
@@ -227,7 +276,7 @@ namespace SmartBook
                         $"{"ISBN".PadRight(isbnWidth)} " +
                         $"{"Kategori".PadRight(categoryWidth)} " +
                         $"{"Status".PadRight(statusWidth)}");
-                    Console.WriteLine(new string('─', titleWidth + authorWidth + isbnWidth + categoryWidth + statusWidth + 3));
+                    Console.WriteLine(new string('─', titleWidth + authorWidth + isbnWidth + categoryWidth + statusWidth + 5));
 
                     foreach (var book in books)
                     {
@@ -287,6 +336,24 @@ namespace SmartBook
             finally
             {
                 PauseExecution();
+            }
+        }
+
+        public static void SaveToLibrary()
+        {
+            try
+            {
+                int savedCount = library.SaveToFile(filePath);
+                if (savedCount >= 0)
+                {
+                    DisplaySuccess($"📚 Sparade {savedCount} böcker till biblioteket!");
+                    Thread.Sleep(3000);
+                }
+            }
+            catch (Exception ex)
+            {
+
+                DisplayError($"Fel: {ex.Message}");
             }
         }
 

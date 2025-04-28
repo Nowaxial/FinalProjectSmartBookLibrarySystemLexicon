@@ -26,14 +26,25 @@ namespace SmartBook
             Books.Add(book);
             return true;  // Returnera true för att indikera lyckat tillägg
         }
-        public bool RemoveBook(string identifier)
+        public bool RemoveBook(string identifier, string filePath)
         {
-            var book = Books.FirstOrDefault(b => b.ISBN == identifier || b.Title == identifier);
-            if (book != null)
+            var book = Books.FirstOrDefault(b =>
+            b.ISBN.Equals(identifier, StringComparison.OrdinalIgnoreCase) ||
+            b.Title.Equals(identifier, StringComparison.OrdinalIgnoreCase));
+            if (book == null) return false;
+
+            if (book.IsBorrowed)
             {
-                return Books.Remove(book);
+                UIHelpers.DisplayWarning("Kan inte ta bort en utlånad bok.");
+                return false;
             }
-            return false;
+
+            bool removedBook = Books.Remove(book);
+            if (removedBook)
+            {
+                SaveToFile(filePath);
+            }
+            return removedBook;
         }
 
         public List<Book> GetAllBooksSorted()
@@ -48,34 +59,35 @@ namespace SmartBook
             b.Author.Contains(query, StringComparison.OrdinalIgnoreCase) ||
             b.ISBN.Contains(query, StringComparison.OrdinalIgnoreCase))];
         }
-        public void SaveToFile(string filePath)
+        // I Library.cs
+        public int SaveToFile(string filePath)
         {
             try
             {
-                // Ladda först befintliga böcker från filen
-                List<Book> existingBooks = [];
+                // 1. Ladda befintliga böcker från filen (om filen finns)
+                List<Book> existingBooks = new List<Book>();
                 if (File.Exists(filePath))
                 {
-                    var existingJson = File.ReadAllText(filePath);
-                    existingBooks = JsonSerializer.Deserialize<List<Book>>(existingJson) ?? [];
+                    string existingJson = File.ReadAllText(filePath);
+                    existingBooks = JsonSerializer.Deserialize<List<Book>>(existingJson) ?? new List<Book>();
                 }
 
-                // Slå samman och ta bort dubbletter
-                var allBooks = Books.UnionBy(existingBooks, b => b.ISBN).ToList();
+                // 2. Slå samman gamla och nya böcker, undvik dubbletter via ISBN
+                var mergedBooks = existingBooks
+                    .UnionBy(Books, b => b.ISBN)
+                    .ToList();
 
-                // Spara den kombinerade listan
+                // 3. Spara den sammanslagna listan
                 var options = new JsonSerializerOptions { WriteIndented = true };
-                var json = JsonSerializer.Serialize(allBooks, options);
+                string json = JsonSerializer.Serialize(mergedBooks, options);
                 File.WriteAllText(filePath, json);
 
-                Console.WriteLine($"📚 Sparade {allBooks.Count} bok/böcker till biblioteket");
+                return mergedBooks.Count; // Returnera totalt antal böcker
             }
             catch (Exception ex)
             {
-                UIHelpers.DisplayError($"Fel: {ex.Message}");
-            }
-            finally {
-                Thread.Sleep(3000);
+                UIHelpers.DisplayError($"Fel vid sparning: {ex.Message}");
+                return -1;
             }
         }
 
@@ -97,8 +109,8 @@ namespace SmartBook
                         }
                     }
 
-                    UIHelpers.DisplaySuccess($"📚 Laddade {loadedBooks.Count} bok/böcker från biblioteket");
-                    Console.WriteLine($"Totalt antal böcker i biblioteket: {Books.Count}");
+                    UIHelpers.DisplaySuccess($"📚 Laddade {loadedBooks.Count} bok/böcker från biblioteket (json)\n");
+                    UIHelpers.DisplaySuccess($"Totalt antal böcker i biblioteket: {Books.Count}");
                 }
                 else
                 {
