@@ -64,25 +64,17 @@ namespace SmartBook
         {
             try
             {
-                // 1. Ladda befintliga böcker från filen (om filen finns)
-                List<Book> existingBooks = new List<Book>();
-                if (File.Exists(filePath))
+                Console.WriteLine("\nDebug: Böcker som sparas:");
+                foreach (var book in Books)
                 {
-                    string existingJson = File.ReadAllText(filePath);
-                    existingBooks = JsonSerializer.Deserialize<List<Book>>(existingJson) ?? new List<Book>();
+                    Console.WriteLine($"{book.Title} - Lånad: {book.IsBorrowed}");
                 }
 
-                // 2. Slå samman gamla och nya böcker, undvik dubbletter via ISBN
-                var mergedBooks = existingBooks
-                    .UnionBy(Books, b => b.ISBN)
-                    .ToList();
-
-                // 3. Spara den sammanslagna listan
                 var options = new JsonSerializerOptions { WriteIndented = true };
-                string json = JsonSerializer.Serialize(mergedBooks, options);
+                string json = JsonSerializer.Serialize(Books, options);
                 File.WriteAllText(filePath, json);
 
-                return mergedBooks.Count; // Returnera totalt antal böcker
+                return Books.Count;
             }
             catch (Exception ex)
             {

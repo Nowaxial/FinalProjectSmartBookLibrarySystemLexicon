@@ -170,7 +170,7 @@ namespace SmartBook
                     var book = new Book(title, author, isbn, category);
                     if (library.AddBook(book))
                     {
-                        DisplaySuccess("Boken har lagts till!");
+                        DisplaySuccess("Boken har lagts till till i biblioteket och sparats till fil!");
                     }
 
                     while (true)
@@ -201,6 +201,7 @@ namespace SmartBook
                 {
                     if (continueAdding)
                     {
+                        library.SaveToFile(filePath);
                         PauseExecution();
                     }
                 }
@@ -245,7 +246,7 @@ namespace SmartBook
             {
                 DisplayError("Kunde inte hitta boken eller den är utlånad");
             }
-
+            library.SaveToFile(filePath);
             PauseExecution();
 
 
@@ -360,6 +361,58 @@ namespace SmartBook
         private static void ToggleBorrowStatus()
         {
             MenuHelpers.ToggleBorrowStatusUI();
+
+            var books = library.GetAllBooksSorted();
+
+            if (books.Count == 0)
+            {
+                DisplayWarning("Inga böcker finns  i biblioteket");
+                PauseExecution();
+                return;
+            }
+            Console.WriteLine("\nTillgängliga böcker:\n");
+            Console.WriteLine(
+                $"{"Nr".PadRight(5)} " +
+                $"{"Titel".PadRight(25)} " +
+                $"{"ISBN".PadRight(20)} " +
+                $"{"Status".PadRight(12)}");
+
+            for (int i = 0; i < books.Count; i++)
+            {
+                Console.WriteLine(
+            $"{i + 1,-5} " +
+            $"{books[i].Title.PadRight(25)} " +
+            $"{books[i].ISBN.PadRight(25)} " +
+            $"{(books[i].IsBorrowed ? "🔴 Utlånad" : "🟢 Tillgänglig")}");
+            }
+
+            string choice = GetUserInput("\nAnge numret på boken som du vill ändra status för (0 för att avbryta: ");
+
+            if (choice == "0")
+            {
+                ReturnToMainMenu();
+                return;
+            }
+            if (!int.TryParse(choice, out int bookIndex) || bookIndex < 1 || bookIndex > books.Count)
+            {
+                DisplayError("Felaktigt val. Välj ett nummer från listan");
+                PauseExecution();
+                return;
+            }
+
+            Book selectedBook = books[bookIndex - 1];
+            if (selectedBook.IsBorrowed)
+            {
+                selectedBook.ReturnBook();
+
+            }
+            else
+            {
+                selectedBook.BorrowBook();
+            }
+            DisplaySuccess($"Status för '{selectedBook.Title}' är nu {(selectedBook.IsBorrowed ? "🔴 Utlånad" : "🟢 Tillgänglig")}");
+            library.SaveToFile(filePath);
+            PauseExecution();
         }
     }
 }
