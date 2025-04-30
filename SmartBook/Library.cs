@@ -79,8 +79,8 @@ namespace SmartBook
                 {
                     string json = File.ReadAllText(filePath);
 
-                    // Lägg till dessa inställningar för att hantera private set
-                   var options = new JsonSerializerOptions
+                    // Använd JsonSerializerOptions för att hantera indentering
+                    var options = new JsonSerializerOptions
                     {
                         WriteIndented = true // För konsistens med SaveToFile
                     };

@@ -123,6 +123,22 @@
             Console.Write(prompt);
             return Console.ReadLine()?.Trim() ?? string.Empty;
         }
+
+        private static void AddDemoBooks()
+        {
+            var demoBooks = new List<Book>
+            {
+                new Book("Jag lever!", "Darth Sidious", "1234567890", "Psykologi"),
+                new Book("Lever jag?", "Han Solo", "0987654321", "Sci-fi"),
+                new Book("Hur ska jag leva?", "Darth Vader", "1122334455", "Filosofi")
+            };
+            foreach (var book in demoBooks)
+            {
+                library.AddBook(book);
+            }
+            DisplaySuccess($"{demoBooks.Count}st demo böcker har lagts till i biblioteket!");
+            PauseExecution();
+        }
         #endregion Hjälpmetoder
 
 
@@ -171,10 +187,13 @@
                         case "8":
                             library.Books.Clear();
                             break;
+                        case "9":
+                            AddDemoBooks();
+                            break;
 
                         default:
                             DisplayError(
-                                $"Felaktigt val: '{input}' | Välj mellan 1-8 eller 0 för att avsluta"
+                                $"Felaktigt val: '{input}' | Välj mellan 1-9 eller 0 för att avsluta"
                             );
                             Thread.Sleep(2000);
                             break;
@@ -358,7 +377,9 @@
 
                 if (bookToRemove == null)
                 {
-                    DisplayError("Boken hittades inte.");
+                    DisplayError("Boken hittades inte, försök igen!.");
+                    PauseExecution();
+                    continue;
                 }
                 else if (bookToRemove.IsBorrowed)
                 {
@@ -382,6 +403,7 @@
 
                     if (response == "j" || response == "ja")
                     {
+                        RemoveBook();
                         break;
                     }
                     else if (response == "n" || response == "nej")

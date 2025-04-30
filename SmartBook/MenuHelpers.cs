@@ -22,6 +22,7 @@ namespace SmartBook
             Console.WriteLine("║ 6. Spara bibliotek till fil      ║");
             Console.WriteLine("║ 7. Ladda bibliotek från fil      ║");
             Console.WriteLine("║ 8. Radera biblioteket            ║");
+            Console.WriteLine("║ 9. Lägg till demo böcker         ║");
             Console.WriteLine("║ 0. Avsluta                       ║");
             Console.WriteLine("╚══════════════════════════════════╝");
         }
