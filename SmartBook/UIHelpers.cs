@@ -3,7 +3,9 @@
     public class UIHelpers
     {
         public static Library library = new();
-        const string filePath = "library.json";
+        private const string filePath = "library.json";
+
+        #region Hjälpmetoder
 
         public static void DisplayError(string message)
         {
@@ -92,11 +94,7 @@
             return isbn;
         }
 
-        public static bool AskToContinue(
-            string prompt,
-            string successMessage,
-            string errorMessage = "Ogiltigt val. Ange 'j' för ja eller 'n' för nej."
-        )
+        public static bool AskToContinue(string prompt,string successMessage,string errorMessage = "Ogiltigt val. Ange 'j' för ja eller 'n' för nej.")
         {
             while (true)
             {
@@ -120,12 +118,13 @@
                 }
             }
         }
-
         private static string GetUserInput(string prompt)
         {
             Console.Write(prompt);
             return Console.ReadLine()?.Trim() ?? string.Empty;
         }
+        #endregion Hjälpmetoder
+
 
         public static void MainMenu()
         {
@@ -188,6 +187,10 @@
             }
         }
 
+        
+
+        
+        #region Menymetoderna för huvudmenyn
         private static void AddBook()
         {
             bool continueAdding = true;
@@ -440,10 +443,6 @@
             while (true)
             {
                 MenuHelpers.ToggleBorrowStatusUI();
-                Console.WriteLine("\nVälj alternativ:");
-                Console.WriteLine("1. Låna ut bok");
-                Console.WriteLine("2. Lämna tillbaka bok");
-                Console.WriteLine("0. Tillbaka till huvudmenyn");
 
                 string menuChoice = GetUserInput("\nVal: ");
 
@@ -476,32 +475,25 @@
                     );
                     Console.WriteLine(new string('─', 65));
 
-                    for (int i = 0; i < availableBooks.Count; i++)
+                    for (int i = 0 ; i < availableBooks.Count ; i++)
                     {
                         Console.WriteLine(
-                            $"{i + 1, -5} "
+                            $"{i + 1,-5} "
                                 + $"{availableBooks[i].Title.PadRight(25)} "
                                 + $"{availableBooks[i].Author.PadRight(20)} "
                                 + $"{availableBooks[i].ISBN.PadRight(15)}"
                         );
                     }
 
-                    string choice = GetUserInput(
-                        "\nAnge nummer på bok att låna (0 för att avbryta): "
-                    );
+                    string choice = GetUserInput("\nAnge nummer på bok att låna (0 för att avbryta): ");
+                    // Om användaren väljer 0, avbryt
                     if (choice == "0")
                         continue;
-
-                    if (
-                        int.TryParse(choice, out int bookIndex)
-                        && bookIndex > 0
-                        && bookIndex <= availableBooks.Count
-                    )
+                    // Kontrollera om valet är ett giltigt nummer
+                    if (int.TryParse(choice, out int bookIndex) && bookIndex > 0 && bookIndex <= availableBooks.Count)
                     {
                         availableBooks[bookIndex - 1].BorrowBook();
-                        DisplaySuccess(
-                            $"Boken '{availableBooks[bookIndex - 1].Title}' är nu utlånad"
-                        );
+                        DisplaySuccess($"Boken '{availableBooks[bookIndex - 1].Title}' är nu utlånad");
                         library.SaveToFile(filePath);
                     }
                     else
@@ -533,10 +525,10 @@
                     );
                     Console.WriteLine(new string('─', 65));
 
-                    for (int i = 0; i < borrowedBooks.Count; i++)
+                    for (int i = 0 ; i < borrowedBooks.Count ; i++)
                     {
                         Console.WriteLine(
-                            $"{i + 1, -5} "
+                            $"{i + 1,-5} "
                                 + $"{borrowedBooks[i].Title.PadRight(25)} "
                                 + $"{borrowedBooks[i].Author.PadRight(20)} "
                                 + $"{borrowedBooks[i].ISBN.PadRight(15)}"
@@ -549,11 +541,7 @@
                     if (choice == "0")
                         continue;
 
-                    if (
-                        int.TryParse(choice, out int bookIndex)
-                        && bookIndex > 0
-                        && bookIndex <= borrowedBooks.Count
-                    )
+                    if (int.TryParse(choice, out int bookIndex)&& bookIndex > 0&& bookIndex <= borrowedBooks.Count)
                     {
                         borrowedBooks[bookIndex - 1].ReturnBook();
                         DisplaySuccess(
@@ -574,5 +562,6 @@
                 }
             }
         }
+        #endregion Menymetoderna för huvudmenyn
     }
 }
