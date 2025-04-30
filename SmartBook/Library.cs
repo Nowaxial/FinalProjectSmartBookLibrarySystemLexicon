@@ -26,7 +26,7 @@ namespace SmartBook
             Books.Add(book);
             return true;  // Returnera true för att indikera lyckat tillägg
         }
-        public bool RemoveBook(string identifier, string filePath)
+        public bool RemoveBook(string identifier)
         {
             var book = Books.FirstOrDefault(b =>
             b.ISBN.Equals(identifier, StringComparison.OrdinalIgnoreCase) ||
@@ -38,20 +38,12 @@ namespace SmartBook
                 UIHelpers.DisplayWarning("Kan inte ta bort en utlånad bok.");
                 return false;
             }
-
-            bool removedBook = Books.Remove(book);
-            if (removedBook)
-            {
-                SaveToFile(filePath);
-            }
-            return removedBook;
+            return Books.Remove(book);
         }
-
         public List<Book> GetAllBooksSorted()
         {
             return [.. Books.OrderBy(b => b.Title).ThenBy(b => b.Author)];
         }
-
         public List<Book> Search(string query)
         {
             return [.. Books.Where(b =>
@@ -59,18 +51,14 @@ namespace SmartBook
             b.Author.Contains(query, StringComparison.OrdinalIgnoreCase) ||
             b.ISBN.Contains(query, StringComparison.OrdinalIgnoreCase))];
         }
-        // I Library.cs
         public int SaveToFile(string filePath)
         {
             try
             {
-                Console.WriteLine("\nDebug: Böcker som sparas:");
-                foreach (var book in Books)
+                var options = new JsonSerializerOptions
                 {
-                    Console.WriteLine($"{book.Title} - Lånad: {book.IsBorrowed}");
-                }
-
-                var options = new JsonSerializerOptions { WriteIndented = true };
+                    WriteIndented = true,
+                };
                 string json = JsonSerializer.Serialize(Books, options);
                 File.WriteAllText(filePath, json);
 
@@ -89,19 +77,27 @@ namespace SmartBook
             {
                 if (File.Exists(filePath))
                 {
-                    var json = File.ReadAllText(filePath);
-                    var loadedBooks = JsonSerializer.Deserialize<List<Book>>(json) ?? [];
+                    string json = File.ReadAllText(filePath);
+
+                    // Lägg till dessa inställningar för att hantera private set
+                   var options = new JsonSerializerOptions
+                    {
+                        WriteIndented = true // För konsistens med SaveToFile
+                    };
+                    var loadedBooks = JsonSerializer.Deserialize<List<Book>>(json) ?? new List<Book>();
 
                     // Lägg till de laddade böckerna till den befintliga listan
                     foreach (var book in loadedBooks)
                     {
                         if (!Books.Any(b => b.ISBN == book.ISBN)) // Undvik dubbletter
                         {
-                            Books.Add(book);
+                            Books.AddRange(book);
                         }
                     }
+                    Books.Clear();
+                    Books.AddRange(loadedBooks); //// Lägger till alla böcker på en gång
 
-                    UIHelpers.DisplaySuccess($"📚 Laddade {loadedBooks.Count} bok/böcker från biblioteket (json)\n");
+                    UIHelpers.DisplaySuccess($"📚 Laddade {loadedBooks.Count} bok/böcker från biblioteket (json-fil)");
                     UIHelpers.DisplaySuccess($"Totalt antal böcker i biblioteket: {Books.Count}");
                 }
                 else
