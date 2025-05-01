@@ -84,7 +84,9 @@ namespace SmartBook
                     {
                         WriteIndented = true // För konsistens med SaveToFile
                     };
-                    var loadedBooks = JsonSerializer.Deserialize<List<Book>>(json) ?? new List<Book>();
+
+                    // Ladda böcker från JSON-filen
+                    var loadedBooks = JsonSerializer.Deserialize<List<Book>>(json, options) ?? []; 
 
                     // Lägg till de laddade böckerna till den befintliga listan
                     foreach (var book in loadedBooks)
@@ -102,7 +104,7 @@ namespace SmartBook
                 }
                 else
                 {
-                    UIHelpers.DisplayWarning("Ingen sparad fil hittades - fortsätter med nuvarande bibliotek");
+                    UIHelpers.DisplayWarning("Ingen sparad fil hittades - fortsätter med tomt bibliotek");
                 }
             }
             catch (Exception ex)
@@ -111,7 +113,7 @@ namespace SmartBook
             }
             finally
             {
-                Thread.Sleep(3000);
+                Thread.Sleep(2000);
             }
         }
     }
