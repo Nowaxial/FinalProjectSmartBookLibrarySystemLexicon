@@ -29,8 +29,15 @@ namespace SmartBook
         }
         public static bool IsValidIsbn(string isbn)
         {
-            if (string.IsNullOrWhiteSpace(isbn)) return false;
-            return isbn.Length >= 10 && isbn.All(c => char.IsDigit(c) || c == '-');
+            if (string.IsNullOrWhiteSpace(isbn))
+                return false;
+
+            // Ta bort alla bindestreck och mellanslag
+            string cleanedIsbn = isbn.Replace("-", "").Replace(" ", "");
+
+            // ISBN-13 måste ha exakt 13 siffror
+            return cleanedIsbn.Length == 13 &&
+                   cleanedIsbn.All(char.IsDigit);
         }
 
         public string ToSearchString()

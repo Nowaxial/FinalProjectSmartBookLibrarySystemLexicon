@@ -78,23 +78,38 @@
             return input;
         }
 
-        private static string GetValidatedIsbn()
+        private static string? GetValidatedIsbn()
         {
-            string isbn;
-            bool isValid;
-            do
+            while (true)
             {
-                isbn = GetUserInput("ISBN: ");
-                isValid = Book.IsValidIsbn(isbn);
-                if (!isValid)
+                string input = GetUserInput("ISBN-13 (tryck ENTER för att avbryta): ").Trim();
+
+                // Om användaren trycker ENTER, avbryt
+                if (string.IsNullOrEmpty(input))
                 {
-                    DisplayError("Ogiltigt ISBN. Måste vara minst 10 siffror eller bindestreck.");
+                    return null; 
                 }
-            } while (!isValid);
-            return isbn;
+
+                // Validera ISBN
+                string cleanedIsbn = input.Replace("-", "").Replace(" ", "");
+
+                if (cleanedIsbn.Length != 13)
+                {
+                    DisplayError("ISBN måste vara 13 siffror långt.");
+                    continue;
+                }
+
+                // Kontrollera om ISBN innehåller ogiltiga tecken
+                if (!cleanedIsbn.All(char.IsDigit))
+                {
+                    DisplayError("ISBN får bara innehålla siffror och bindestreck.");
+                    continue;
+                }
+                return cleanedIsbn; // Giltigt ISBN
+            }
         }
 
-        public static bool AskToContinue(string prompt,string successMessage,string errorMessage = "Ogiltigt val. Ange 'j' för ja eller 'n' för nej.")
+        public static bool AskToContinue(string prompt, string successMessage, string errorMessage = "Ogiltigt val. Ange 'j' för ja eller 'n' för nej.")
         {
             while (true)
             {
@@ -206,82 +221,71 @@
             }
         }
 
-        
 
-        
+
+
         #region Menymetoderna för huvudmenyn
         private static void AddBook()
         {
-            bool continueAdding = true;
-
-            while (continueAdding)
+            while (true) // Huvudloop för att lägga till flera böcker
             {
                 MenuHelpers.AddBookUI();
 
-                // Hämta input
+                // Hämta titel, författare och kategori (redan validerat)
                 string title = GetValidatedInput("Titel: ", "Titel får inte vara tom");
                 string author = GetValidatedInput("Författare: ", "Författare får inte vara tom");
                 string category = GetValidatedInput("Kategori: ", "Kategori får inte vara tom");
 
-                // Hämta ISBN och kontrollera att det inte redan finns
-                string isbn;
-                bool isbnExists;
-                do
+                // Hämta ISBN
+                string isbn = GetValidatedIsbn();
+                if (isbn == null) // Användaren avbröt (tryckte ENTER eller "exit")
                 {
-                    isbn = GetValidatedIsbn();
-                    isbnExists = library.Books.Any(b =>
-                        b.ISBN.Equals(isbn, StringComparison.OrdinalIgnoreCase)
-                    );
+                    ReturnToMainMenu();
+                    return;
+                }
 
-                    if (isbnExists)
-                    {
-                        UIHelpers.DisplayWarning(
-                            $"En bok med ISBN '{isbn}' finns redan. Ange ett nytt ISBN."
-                        );
-                    }
-                } while (isbnExists);
+                // Kontrollera om ISBN redan finns
+                if (library.Books.Any(b => b.ISBN.Equals(isbn, StringComparison.OrdinalIgnoreCase)))
+                {
+                    UIHelpers.DisplayWarning($"En bok med ISBN '{isbn}' finns redan. Försök igen.");
+                    continue; // Börja om loopen
+                }
 
+                // Försök lägga till boken
                 try
                 {
                     var book = new Book(title, author, isbn, category);
                     if (library.AddBook(book))
                     {
-                        DisplaySuccess("Boken har lagts till till i biblioteket!");
+                        DisplaySuccess("Boken har lagts till i biblioteket!");
                     }
 
-                    while (true)
+                    // Fråga om användaren vill lägga till fler böcker
+                    string response;
+                    do
                     {
-                        string response = GetUserInput(
-                                "Vill du lägga till fler böcker? (j)a/(n)ej: "
-                            )
-                            .ToLower();
+                        response = GetUserInput("Vill du lägga till fler böcker? (j)a/(n)ej: ")
+                            .Trim().ToLower();
 
                         if (response == "j" || response == "ja")
                         {
-                            break;
+                            break; // Fortsätt loopen
                         }
                         else if (response == "n" || response == "nej")
                         {
-                            continueAdding = false;
                             ReturnToMainMenu();
-                            return;
+                            return; // Avsluta metoden
                         }
                         else
                         {
                             DisplayError("Ogiltigt val. Ange 'j' för ja eller 'n' för nej.");
                         }
-                    }
+                    } while (true);
                 }
                 catch (Exception ex)
                 {
                     DisplayError($"Fel: {ex.Message}");
-                }
-                finally
-                {
-                    if (continueAdding)
-                    {
-                        AddBook();
-                    }
+                    continue; // Börja om loopen vid fel
                 }
             }
         }
@@ -563,7 +567,7 @@
                     if (choice == "0")
                         continue;
 
-                    if (int.TryParse(choice, out int bookIndex)&& bookIndex > 0&& bookIndex <= borrowedBooks.Count)
+                    if (int.TryParse(choice, out int bookIndex) && bookIndex > 0 && bookIndex <= borrowedBooks.Count)
                     {
                         borrowedBooks[bookIndex - 1].ReturnBook();
                         DisplaySuccess(
