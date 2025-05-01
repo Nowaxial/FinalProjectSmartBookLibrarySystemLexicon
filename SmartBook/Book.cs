@@ -42,7 +42,7 @@ namespace SmartBook
 
         public string ToSearchString()
         {
-            return string.Format("{0,-25} {1,-25} {2,-15}",
+            return string.Format("{0,-25} {1,-25} {2,-13}",
                 Title,
                 Author,
                 ISBN);

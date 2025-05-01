@@ -32,7 +32,8 @@ namespace SmartBook
             Console.Clear();
             Console.WriteLine("╔══════════════════════════════════╗");
             Console.WriteLine("║   Lägg till bok i biblioteket    ║");
-            Console.WriteLine("╚══════════════════════════════════╝");
+            Console.WriteLine("║   Tryck ENTER för att avbryta    ║");
+            Console.WriteLine("╚══════════════════════════════════╝\n");
         }
 
         public static void RemoveBookUI()
@@ -40,6 +41,7 @@ namespace SmartBook
             Console.Clear();
             Console.WriteLine("╔══════════════════════════════════╗");
             Console.WriteLine("║   Ta bort bok från biblioteket   ║");
+            Console.WriteLine("║   Tryck ENTER för att avbryta    ║");
             Console.WriteLine("╚══════════════════════════════════╝");
         }
 
@@ -62,13 +64,13 @@ namespace SmartBook
         public static void ToggleBorrowStatusUI()
         {
             Console.Clear();
-            Console.WriteLine("╔═══════════════════════════════════╗");
-            Console.WriteLine("║     Låna / lämna tillbaka bok     ║");
-            Console.WriteLine("╠═══════════════════════════════════╣");
-            Console.WriteLine("║ 1. Låna en bok                    ║");
-            Console.WriteLine("║ 2. Lämna tillbaka en bok          ║");
-            Console.WriteLine("║ 0. Tillbaka till huvudmenyn       ║");
-            Console.WriteLine("╚═══════════════════════════════════╝");
+            Console.WriteLine("╔═════════════════════════════════════════════╗");
+            Console.WriteLine("║          Låna / lämna tillbaka bok          ║");
+            Console.WriteLine("╠════════════════════════════════════════════ ╣");
+            Console.WriteLine("║ 1. Låna en bok                              ║");
+            Console.WriteLine("║ 2. Lämna tillbaka en bok                    ║");
+            Console.WriteLine("║ Tryck 'ENTER' för att komma till huvudmenyn ║");
+            Console.WriteLine("╚═════════════════════════════════════════════╝");
         }
 
         public static void BorrowBookUI()
@@ -76,6 +78,7 @@ namespace SmartBook
             Console.Clear();
             Console.WriteLine("╔═══════════════════════════════════╗");
             Console.WriteLine("║            Låna bok               ║");
+            Console.WriteLine("║ Tryck 'ENTER' för att gå tillbaka ║");
             Console.WriteLine("╚═══════════════════════════════════╝");
         }
 
@@ -84,6 +87,7 @@ namespace SmartBook
             Console.Clear();
             Console.WriteLine("╔═══════════════════════════════════╗");
             Console.WriteLine("║        Lämna tillbaka bok         ║");
+            Console.WriteLine("║ Tryck 'ENTER' för att gå tillbaka ║");
             Console.WriteLine("╚═══════════════════════════════════╝");
         }
     }

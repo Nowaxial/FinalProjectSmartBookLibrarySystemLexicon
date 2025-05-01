@@ -33,6 +33,11 @@
             Console.WriteLine("Åter till huvudmenyn....");
             Thread.Sleep(1250);
         }
+        private static void ReturnToMenu()
+        {
+            Console.WriteLine("Åter till menyn....");
+            Thread.Sleep(1250);
+        }
 
         public static void PauseExecution(string message = "Tryck <Enter> för att fortsätta...")
         {
@@ -182,6 +187,11 @@
                new Book("Jag lever!", "Darth Sidious", "1234567890", "Psykologi") { IsBorrowed = true },
                new Book("Lever jag?", "Han Solo", "0987654321", "Sci-fi"),
                new Book("Hur ska jag leva?", "Darth Vader", "1122334455", "Filosofi") { IsBorrowed = true },
+               new Book("Lever du?", "Leia Organa", "2233445566", "Drama"),
+               new Book("Lever vi?", "Obi-Wan Kenobi", "3344556677", "Action") { IsBorrowed = true },
+               new Book("Lever de?", "Yoda", "4455667788", "Fantasy"),
+               new Book("Lever ni?", "Padmé Amidala", "5566778899", "Romantik") { IsBorrowed = true },
+               new Book("Lever hen?", "Chewbacca", "6677889900", "Äventyr"),
             };
 
             // Räknar antalet böcker som finns innan vi lägger till nya
@@ -209,6 +219,129 @@
             }
 
             PauseExecution();
+        }
+
+        private static void HandleReturnBooks()
+        {
+            while (true) // Loop för att kunna hantera flera böcker
+            {
+                MenuHelpers.ReturnBookUI();
+
+                {
+                    // Visa alla utlånade böcker
+                    var borrowedBooks = library.Books
+                    .Where(b => b.IsBorrowed)
+                    .OrderBy(b => b.Title)
+                    .ToList();
+
+                    // Om inga böcker finns, gå tillbaka
+                    if (borrowedBooks.Count == 0)
+                    {
+                        DisplayWarning("Inga utlånade böcker att lämna tillbaka");
+                        PauseExecution();
+                        return; // Tillbaka till Toggle-menyn
+                    }
+
+                    // Visa uppdaterad lista
+                    Console.WriteLine("\nUtlånade böcker:\n");
+                    Console.WriteLine($"{"Nr".PadRight(5)} {"Titel".PadRight(25)} {"Författare".PadRight(20)} {"Status".PadRight(15)} ");
+                    Console.WriteLine(new string('─', 63));
+
+                    for (int i = 0 ; i < borrowedBooks.Count ; i++)
+                    {
+                        string status = borrowedBooks[i].IsBorrowed ? "🔴 Utlånad" : "🟢 Tillgänglig";
+                        Console.WriteLine($"{i + 1,-5} {borrowedBooks[i].Title.PadRight(25)} {borrowedBooks[i].Author.PadRight(20)} {status.PadRight(15)}");
+                    }
+
+                    // Bokval - ENTER går tillbaka till Toggle-menyn
+                    string choice = GetUserInput("\nAnge boknummer: ");
+                    if (string.IsNullOrEmpty(choice))
+                    {
+                        ReturnToMenu();
+                        return; // Tillbaka till Toggle-menyn
+                    }
+
+                    // Validera boknumret och kontrollera att det är giltigt
+                    if (int.TryParse(choice, out int bookIndex) && bookIndex > 0 && bookIndex <= borrowedBooks.Count)
+                    {
+                        // Utför återlämning
+                        borrowedBooks[bookIndex - 1].ReturnBook();
+                        DisplaySuccess($"Boken '{borrowedBooks[bookIndex - 1].Title}' är nu tillgänglig");
+                        library.SaveToFile(filePath);
+
+                        // Fråga om att fortsätta lämna tillbaka
+                        if (!AskToContinue("Vill du lämna tillbaka en till bok? (j)a / (n)ej: ", ""))
+                        {
+                            ReturnToMenu();
+                            return; // Tillbaka till Toggle-menyn
+                        }
+                    }
+                    else
+                    {
+                        DisplayError("Ogiltigt boknummer");
+                        PauseExecution();
+                    }
+                }
+            }
+        }
+
+        private static void HandleBorrowBooks()
+        {
+            while (true) // Loop för att kunna hantera flera böcker
+            {
+                MenuHelpers.BorrowBookUI();
+
+                // Visa alla tillgängliga böcker
+                var availableBooks = library.Books
+                    .Where(b => !b.IsBorrowed)
+                    .OrderBy(b => b.Title)
+                    .ToList();
+
+                // Om inga böcker finns, gå tillbaka
+                if (availableBooks.Count == 0)
+                {
+                    DisplayWarning("Inga tillgängliga böcker att låna");
+                    PauseExecution();
+                    return; // Tillbaka till Toggle-menyn
+                }
+
+                // Visa uppdaterad lista
+                Console.WriteLine("\nTillgängliga böcker:\n");
+                Console.WriteLine($"{"Nr".PadRight(5)} {"Titel".PadRight(25)} {"Författare".PadRight(20)} {"Status".PadRight(15)}");
+                Console.WriteLine(new string('─', 67));
+
+                for (int i = 0 ; i < availableBooks.Count ; i++)
+                {
+                    string status = availableBooks[i].IsBorrowed ? "🔴 Utlånad" : "🟢 Tillgänglig";
+                    Console.WriteLine($"{i + 1,-5} {availableBooks[i].Title.PadRight(25)} {availableBooks[i].Author.PadRight(20)} {status.PadRight(15)}");
+                }
+
+                // Bokval - ENTER går tillbaka till Toggle-menyn
+                string choice = GetUserInput("\nAnge boknummer: ");
+                if (string.IsNullOrEmpty(choice))
+                {
+                    ReturnToMenu();
+                    return; // Tillbaka till Toggle-menyn
+                }
+
+                if (int.TryParse(choice, out int bookIndex) && bookIndex > 0 && bookIndex <= availableBooks.Count)
+                {
+                    // Utför utlåning
+                    availableBooks[bookIndex - 1].BorrowBook();
+                    DisplaySuccess($"Boken '{availableBooks[bookIndex - 1].Title}' är nu utlånad");
+
+                    // Fråga om att fortsätta låna ut
+                    if (!AskToContinue("Vill du låna ut en till bok? (j)a / (n)ej: ", ""))
+                    {
+                        return; // Tillbaka till Toggle-menyn
+                    }
+                }
+                else
+                {
+                    DisplayError("Ogiltigt boknummer");
+                    PauseExecution();
+                }
+            }
         }
         #endregion Hjälpmetoder
 
@@ -319,7 +452,7 @@
                         DisplaySuccess("Boken lades till!");
                     }
 
-                    if (!AskToContinue("Lägg till fler böcker? (j/n): ", ""))
+                    if (!AskToContinue("Lägg till fler böcker? (j)a / (n)ej: ", ""))
                     {
                         ReturnToMainMenu();
                         return;
@@ -328,7 +461,7 @@
                 catch (Exception ex)
                 {
                     DisplayError($"Fel: {ex.Message}");
-                    if (!AskToContinue("Försöka igen? (j/n): ", ""))
+                    if (!AskToContinue("Försöka igen? (j)a / (n)ej: ", ""))
                     {
                         ReturnToMainMenu();
                         return;
@@ -419,7 +552,7 @@
                     Console.WriteLine($" {book.ToRemoveString()}");
                 }
 
-                string identifier = GetUserInput("\nAnge boktitel eller ISBN att ta bort (tryck ENTER för att avbryta): ");
+                string identifier = GetUserInput("\nAnge boktitel eller ISBN att ta bort: ");
 
                 // Lägg till kontroll för ENTER (tom sträng)
                 if (string.IsNullOrWhiteSpace(identifier))
@@ -455,7 +588,7 @@
                     }
                 }
 
-                if (!AskToContinue("\nVill du ta bort fler böcker? (j)a/(n)ej: ", ""))
+                if (!AskToContinue("\nVill du ta bort fler böcker? (j)a / (n)ej: ", ""))
                 {
                     continueRemoving = false;
                     ReturnToMainMenu();
@@ -466,165 +599,94 @@
 
         private static void SearchAllBooks()
         {
-            MenuHelpers.SearchAllBooksUI();
+            bool searchAgain = true;
 
-            var query = GetUserInput("Sök på författare, titel eller ISBN: ");
-            var results = library.Search(query);
-
-            try
+            while (searchAgain)
             {
-                if (results.Count == 0)
-                {
-                    DisplayWarning("Inga böcker hittades.");
-                }
-                else
-                {
-                    Console.WriteLine($"\nSökresultat: ({results.Count})\n");
+                MenuHelpers.SearchAllBooksUI();
 
-                    Console.WriteLine(
-                        $"{"Titel".PadRight(25)} "
-                            + $"{"Författare".PadRight(25)} "
-                            + $"{"ISBN".PadRight(25)} "
-                    );
-                    Console.WriteLine(new string('─', 25 + 25 + 15));
+                // Sökning efter böcker genom att fråga användaren
+                var query = GetUserInput("Sök på författare, titel eller ISBN: ");
 
-                    foreach (var book in results)
-                    {
-                        Console.WriteLine($"{book.ToSearchString()}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                DisplayError($"Fel: {ex.Message}");
-            }
-            finally
-            {
-                PauseExecution();
-            }
-        }
-
-        private static void ToggleBorrowStatus()
-        {
-            while (true)
-            {
-                MenuHelpers.ToggleBorrowStatusUI();
-
-                string menuChoice = GetUserInput("\nVal: ");
-
-                if (menuChoice == "0")
+                // Avbryt om användaren trycker ENTER utan input
+                if (string.IsNullOrWhiteSpace(query))
                 {
                     ReturnToMainMenu();
                     return;
                 }
 
-                if (menuChoice == "1")
+                var results = library.Search(query);
+
+                try
                 {
-                    // Låna ut bok flöde
-                    MenuHelpers.BorrowBookUI();
-                    var availableBooks = library.Books.Where(b => !b.IsBorrowed).ToList();
-
-                    if (availableBooks.Count == 0)
+                    if (results.Count == 0)
                     {
-                        DisplayWarning("Inga tillgängliga böcker att låna ut");
-                        PauseExecution();
-                        continue;
-                    }
-
-                    // Visa tillgängliga böcker
-                    Console.WriteLine("\nTillgängliga böcker att låna:\n");
-                    Console.WriteLine(
-                        $"{"Nr".PadRight(5)} "
-                            + $"{"Titel".PadRight(25)} "
-                            + $"{"Författare".PadRight(20)} "
-                            + $"{"ISBN".PadRight(15)}"
-                    );
-                    Console.WriteLine(new string('─', 65));
-
-                    for (int i = 0 ; i < availableBooks.Count ; i++)
-                    {
-                        Console.WriteLine(
-                            $"{i + 1,-5} "
-                                + $"{availableBooks[i].Title.PadRight(25)} "
-                                + $"{availableBooks[i].Author.PadRight(20)} "
-                                + $"{availableBooks[i].ISBN.PadRight(15)}"
-                        );
-                    }
-
-                    string choice = GetUserInput("\nAnge nummer på bok att låna (0 för att avbryta): ");
-                    // Om användaren väljer 0, avbryt
-                    if (choice == "0")
-                        continue;
-                    // Kontrollera om valet är ett giltigt nummer
-                    if (int.TryParse(choice, out int bookIndex) && bookIndex > 0 && bookIndex <= availableBooks.Count)
-                    {
-                        availableBooks[bookIndex - 1].BorrowBook();
-                        DisplaySuccess($"Boken '{availableBooks[bookIndex - 1].Title}' är nu utlånad");
-                        library.SaveToFile(filePath);
+                        DisplayWarning("Inga böcker hittades.");
                     }
                     else
                     {
-                        DisplayError("Ogiltigt boknummer");
-                    }
-                    PauseExecution();
-                }
-                else if (menuChoice == "2")
-                {
-                    // Lämna tillbaka bok flöde
-                    MenuHelpers.ReturnBookUI();
-                    var borrowedBooks = library.Books.Where(b => b.IsBorrowed).ToList();
-
-                    if (borrowedBooks.Count == 0)
-                    {
-                        DisplayWarning("Inga utlånade böcker att lämna tillbaka");
-                        PauseExecution();
-                        continue;
-                    }
-
-                    // Visa utlånade böcker
-                    Console.WriteLine("\nUlånade böcker att lämna tillbaka:\n");
-                    Console.WriteLine(
-                        $"{"Nr".PadRight(5)} "
-                            + $"{"Titel".PadRight(25)} "
-                            + $"{"Författare".PadRight(20)} "
-                            + $"{"ISBN".PadRight(15)}"
-                    );
-                    Console.WriteLine(new string('─', 65));
-
-                    for (int i = 0 ; i < borrowedBooks.Count ; i++)
-                    {
+                        Console.WriteLine($"\nSökresultat: ({results.Count})\n");
                         Console.WriteLine(
-                            $"{i + 1,-5} "
-                                + $"{borrowedBooks[i].Title.PadRight(25)} "
-                                + $"{borrowedBooks[i].Author.PadRight(20)} "
-                                + $"{borrowedBooks[i].ISBN.PadRight(15)}"
+                            $"{"Titel".PadRight(25)} " +
+                            $"{"Författare".PadRight(25)} " +
+                            $"{"ISBN".PadRight(13)}"
                         );
+                        Console.WriteLine(new string('─', 62));
+
+                        foreach (var book in results)
+                        {
+                            Console.WriteLine($"{book.ToSearchString()}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    DisplayError($"Fel: {ex.Message}");
+                }
+
+                // Fråga om användaren vill söka igen med din befintliga AskToContinue-metod
+                searchAgain = AskToContinue("\nVill du söka igen? (j)a / (n)ej: ", "");
+            }
+
+            PauseExecution();
+        }
+
+        private static void ToggleBorrowStatus()
+        {
+            while (true) // Huvudloop för låne/återlämningsmenyn
+            {
+                try
+                {
+                    MenuHelpers.ToggleBorrowStatusUI();
+
+                    // Huvudval - ENTER här ska fortfarande gå till huvudmenyn
+                    string menuChoice = GetUserInput("\nVal: ");
+                    if (string.IsNullOrEmpty(menuChoice))
+                    {
+                        ReturnToMainMenu();
+                        return;
                     }
 
-                    string choice = GetUserInput(
-                        "\nAnge nummer på bok att lämna tillbaka (0 för att avbryta): "
-                    );
-                    if (choice == "0")
-                        continue;
-
-                    if (int.TryParse(choice, out int bookIndex) && bookIndex > 0 && bookIndex <= borrowedBooks.Count)
+                    if (menuChoice == "1")
                     {
-                        borrowedBooks[bookIndex - 1].ReturnBook();
-                        DisplaySuccess(
-                            $"Boken '{borrowedBooks[bookIndex - 1].Title}' är nu tillgänglig"
-                        );
-                        library.SaveToFile(filePath);
+                        HandleBorrowBooks(); // Återgår till Toggle-menyn vid ENTER
+                    }
+                    else if (menuChoice == "2")
+                    {
+                        HandleReturnBooks(); // Återgår till Toggle-menyn vid ENTER
                     }
                     else
                     {
-                        DisplayError("Ogiltigt boknummer");
+                        DisplayError("Ogiltigt val. Ange 1, 2 eller tryck ENTER för huvudmeny");
                     }
-                    PauseExecution();
+
+                    // Fråga inte om fortsättning här - återgå direkt till Toggle-menyn
                 }
-                else
+                catch (Exception ex)
                 {
-                    DisplayError("Ogiltigt val. Välj 1, 2 eller 0");
-                    PauseExecution();
+                    DisplayError($"Ett fel uppstod: {ex.Message}");
+                    ReturnToMainMenu();
+                    return; // Avbryter och gå tillbaka till huvudmenyn
                 }
             }
         }
