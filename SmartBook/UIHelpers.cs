@@ -37,6 +37,8 @@
         public static void PauseExecution(string message = "Tryck <Enter> för att fortsätta...")
         {
             Console.WriteLine(message);
+
+            // Vänta på att användaren trycker Enter
             while (Console.ReadKey().Key != ConsoleKey.Enter)
             {
                 // Vänta tills Enter trycks
@@ -47,7 +49,10 @@
         {
             try
             {
+                // Spara biblioteket till fil
                 int savedCount = library.SaveToFile(filePath);
+
+                // Om sparningen lyckades, visa meddelande
                 if (savedCount >= 0)
                 {
                     DisplaySuccess($"📚 Sparade {savedCount} böcker till biblioteket (json)!");
@@ -60,71 +65,101 @@
             }
             catch (Exception ex)
             {
+                // Om något går fel, visa felmeddelande
                 DisplayError($"Fel: {ex.Message}");
             }
         }
 
-        private static string GetValidatedInput(string prompt, string errorMessage)
+        private static string? GetValidatedInput(string prompt, string errorMessage, bool allowEmptyToCancel = false)
         {
-            string input;
-            do
+            // Kör tills vi får godkänd input eller användaren avbryter
+            while (true)
             {
-                input = GetUserInput(prompt);
-                if (string.IsNullOrWhiteSpace(input))
+                // Visar prompten
+                string input = GetUserInput(prompt).Trim();
+
+                // Kolla om användaren vill avbryta med enter (eller tom sträng)
+                if (allowEmptyToCancel && string.IsNullOrEmpty(input))
                 {
-                    DisplayError(errorMessage);
+                    ReturnToMainMenu();  // Gå tillbaka till menyn
+                    return null;          // Tala om att det blev avbrott
                 }
-            } while (string.IsNullOrWhiteSpace(input));
-            return input;
+
+                // Om input är OK (inte tom eller bara mellanslag)
+                if (!string.IsNullOrWhiteSpace(input))
+                {
+                    return input.Trim();  // Skicka tillbaka rensad input
+                }
+
+                // Input var inte godkänd - visa fel och börja om
+                DisplayError(errorMessage);
+            }
         }
 
-        private static string? GetValidatedIsbn()
+        private static string? GetValidatedIsbn(bool allowEmptyToCancel = false)
         {
             while (true)
             {
-                string input = GetUserInput("ISBN-13 (tryck ENTER för att avbryta): ").Trim();
+                string input = GetUserInput("ISBN: ").Trim();
 
-                // Om användaren trycker ENTER, avbryt
-                if (string.IsNullOrEmpty(input))
+                // Kolla om användaren vill avbryta med enter (eller tom sträng)
+                if (allowEmptyToCancel && string.IsNullOrEmpty(input))
                 {
-                    return null; 
+                    ReturnToMainMenu();
+                    return null;
                 }
 
-                // Validera ISBN
-                string cleanedIsbn = input.Replace("-", "").Replace(" ", "");
+                // Rensa input för analys
+                string cleaned = input.Replace("-", "").Replace(" ", "");
 
-                if (cleanedIsbn.Length != 13)
+                // Ge SPECIFIKA felmeddelanden baserat på problemet
+
+                // Kontrollera längd
+                if (cleaned.Length != 13)
                 {
-                    DisplayError("ISBN måste vara 13 siffror långt.");
+                    DisplayError($"Måste vara 13 siffror (du angav {cleaned.Length}).");
                     continue;
                 }
 
-                // Kontrollera om ISBN innehåller ogiltiga tecken
-                if (!cleanedIsbn.All(char.IsDigit))
+                // Kontrollera om det är tomt eller bara bindestreck
+                if (!cleaned.All(char.IsDigit))
                 {
-                    DisplayError("ISBN får bara innehålla siffror och bindestreck.");
+                    DisplayError("Får endast innehålla siffror och bindestreck.");
                     continue;
                 }
-                return cleanedIsbn; // Giltigt ISBN
+
+                // Använd den befintliga valideringsmetod för slutgiltig godkännande (inne i Book-klassen)
+                if (Book.IsValidIsbn(input))
+                {
+                    return cleaned;
+                }
+                // Fallback-felmeddelande (bör aldrig triggas om ovan validering är korrekt)
+                DisplayError("Ogiltigt ISBN.");
             }
         }
 
         public static bool AskToContinue(string prompt, string successMessage, string errorMessage = "Ogiltigt val. Ange 'j' för ja eller 'n' för nej.")
         {
+            // Kör tills vi får godkänd input
             while (true)
             {
+                // Visar prompten
                 string response = GetUserInput(prompt).ToLower();
 
+                // Kolla om användaren vill avbryta med ja eller nej
                 if (response == "j" || response == "ja")
                 {
+                    // Om användaren svarar ja, visa framgångsmeddelande
                     if (!string.IsNullOrEmpty(successMessage))
                     {
                         DisplaySuccess(successMessage);
                     }
                     return true;
                 }
+                // Om användaren svarar nej, går tillbaka till huvudmenyn
                 else if (response == "n" || response == "nej")
                 {
+                    //Return false låter användaren gå tillbaka till huvudmenyn
                     return false;
                 }
                 else
@@ -136,22 +171,43 @@
         private static string GetUserInput(string prompt)
         {
             Console.Write(prompt);
-            return Console.ReadLine()?.Trim() ?? string.Empty;
+            return Console.ReadLine()?.Trim() ?? string.Empty; //Får tillbaka en tom sträng om användaren inte skriver något
         }
 
         private static void AddDemoBooks()
         {
+            // Skapa en lista med demo böcker
             var demoBooks = new List<Book>
             {
-                new Book("Jag lever!", "Darth Sidious", "1234567890", "Psykologi"),
-                new Book("Lever jag?", "Han Solo", "0987654321", "Sci-fi"),
-                new Book("Hur ska jag leva?", "Darth Vader", "1122334455", "Filosofi")
+               new Book("Jag lever!", "Darth Sidious", "1234567890", "Psykologi") { IsBorrowed = true },
+               new Book("Lever jag?", "Han Solo", "0987654321", "Sci-fi"),
+               new Book("Hur ska jag leva?", "Darth Vader", "1122334455", "Filosofi") { IsBorrowed = true },
             };
-            foreach (var book in demoBooks)
+
+            // Räknar antalet böcker som finns innan vi lägger till nya
+            int originalCount = library.Books.Count;
+
+            // Lägg endast till böcker som inte redan finns
+            foreach (var book in demoBooks.Where(b => !library.Books.Any(lb => lb.ISBN.Equals(b.ISBN, StringComparison.OrdinalIgnoreCase))))
             {
                 library.AddBook(book);
             }
-            DisplaySuccess($"{demoBooks.Count}st demo böcker har lagts till i biblioteket!");
+
+            // Räknar ut antalet böcker som lades till
+            int addedCount = library.Books.Count - originalCount;
+
+
+            // Om vi har lagt till böcker, visa meddelande
+            if (addedCount > 0)
+            {
+                DisplaySuccess($"{addedCount}st demo böcker har lagts till i biblioteket!");
+            }
+            else
+            {
+                // Om inga böcker lades till, visa meddelande
+                DisplayWarning("Inga nya demo böcker lades till - alla böcker fanns redan.");
+            }
+
             PauseExecution();
         }
         #endregion Hjälpmetoder
@@ -227,65 +283,56 @@
         #region Menymetoderna för huvudmenyn
         private static void AddBook()
         {
-            while (true) // Huvudloop för att lägga till flera böcker
+            while (true)
             {
-                MenuHelpers.AddBookUI();
-
-                // Hämta titel, författare och kategori (redan validerat)
-                string title = GetValidatedInput("Titel: ", "Titel får inte vara tom");
-                string author = GetValidatedInput("Författare: ", "Författare får inte vara tom");
-                string category = GetValidatedInput("Kategori: ", "Kategori får inte vara tom");
-
-                // Hämta ISBN
-                string isbn = GetValidatedIsbn();
-                if (isbn == null) // Användaren avbröt (tryckte ENTER eller "exit")
-                {
-                    ReturnToMainMenu();
-                    return;
-                }
-
-                // Kontrollera om ISBN redan finns
-                if (library.Books.Any(b => b.ISBN.Equals(isbn, StringComparison.OrdinalIgnoreCase)))
-                {
-                    UIHelpers.DisplayWarning($"En bok med ISBN '{isbn}' finns redan. Försök igen.");
-                    continue; // Börja om loopen
-                }
-
-                // Försök lägga till boken
                 try
                 {
+                    MenuHelpers.AddBookUI();
+
+                    // Hämta och validera input (med null-check)
+                    string? title = GetValidatedInput("Titel: ", "Titel får inte vara tom", allowEmptyToCancel: true);
+                    if (title == null) { return; }
+
+                    string? author = GetValidatedInput("Författare: ", "Författare får inte vara tom", allowEmptyToCancel: true);
+                    if (author == null) { return; }
+
+                    string? category = GetValidatedInput("Kategori: ", "Kategori får inte vara tom", allowEmptyToCancel: true);
+                    if (category == null) { return; }
+
+                    // Hämtar ISBN (med den befintliga valideringen)
+                    string? isbn = GetValidatedIsbn(allowEmptyToCancel: true); //Valideras automatiskt av IsValidIsbn metoden inne i GetValidatedIsbn metoden
+                    if (isbn == null) { return; }
+
+
+
+                    // Kontrollera om boken redan finns i biblioteket och om ISBN är unikt
+                    if (library.Books.Any(b => !string.IsNullOrEmpty(b.ISBN) && b.ISBN.Equals(isbn, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        DisplayWarning($"Bok med ISBN '{isbn}' finns redan.");
+                        continue;
+                    }
+
+                    // Skapa bok (vi vet att inga värden är null här)
                     var book = new Book(title, author, isbn, category);
                     if (library.AddBook(book))
                     {
-                        DisplaySuccess("Boken har lagts till i biblioteket!");
+                        DisplaySuccess("Boken lades till!");
                     }
 
-                    // Fråga om användaren vill lägga till fler böcker
-                    string response;
-                    do
+                    if (!AskToContinue("Lägg till fler böcker? (j/n): ", ""))
                     {
-                        response = GetUserInput("Vill du lägga till fler böcker? (j)a/(n)ej: ")
-                            .Trim().ToLower();
-
-                        if (response == "j" || response == "ja")
-                        {
-                            break; // Fortsätt loopen
-                        }
-                        else if (response == "n" || response == "nej")
-                        {
-                            ReturnToMainMenu();
-                            return; // Avsluta metoden
-                        }
-                        else
-                        {
-                            DisplayError("Ogiltigt val. Ange 'j' för ja eller 'n' för nej.");
-                        }
-                    } while (true);
+                        ReturnToMainMenu();
+                        return;
+                    }
                 }
                 catch (Exception ex)
                 {
                     DisplayError($"Fel: {ex.Message}");
-                    continue; // Börja om loopen vid fel
+                    if (!AskToContinue("Försöka igen? (j/n): ", ""))
+                    {
+                        ReturnToMainMenu();
+                        return;
+                    }
                 }
             }
         }
@@ -372,7 +419,14 @@
                     Console.WriteLine($" {book.ToRemoveString()}");
                 }
 
-                string identifier = GetUserInput("\nAnge boktitel eller ISBN att ta bort: ");
+                string identifier = GetUserInput("\nAnge boktitel eller ISBN att ta bort (tryck ENTER för att avbryta): ");
+
+                // Lägg till kontroll för ENTER (tom sträng)
+                if (string.IsNullOrWhiteSpace(identifier))
+                {
+                    ReturnToMainMenu();
+                    return;
+                }
 
                 var bookToRemove = books.FirstOrDefault(b =>
                     b.ISBN.Equals(identifier, StringComparison.OrdinalIgnoreCase)
@@ -400,26 +454,12 @@
                         DisplayError("Något gick fel vid borttagning.");
                     }
                 }
-                while (true)
-                {
-                    string response = GetUserInput("\nVill du ta bort fler böcker? (j)a/(n)ej: ")
-                        .ToLower();
 
-                    if (response == "j" || response == "ja")
-                    {
-                        RemoveBook();
-                        break;
-                    }
-                    else if (response == "n" || response == "nej")
-                    {
-                        continueRemoving = false;
-                        ReturnToMainMenu();
-                        return;
-                    }
-                    else
-                    {
-                        DisplayError("Ogiltigt val. Ange 'j' för ja eller 'n' för nej.");
-                    }
+                if (!AskToContinue("\nVill du ta bort fler böcker? (j)a/(n)ej: ", ""))
+                {
+                    continueRemoving = false;
+                    ReturnToMainMenu();
+                    return;
                 }
             }
         }
