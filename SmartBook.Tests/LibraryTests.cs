@@ -15,10 +15,10 @@
         {
             // Arrange
             var library = new Library();
-            var book = new Book("Unique Book", "Unique Author", "1234567890125", "Fiction");
+            var book = new Book("Unique Book", "Unique Author", "1234567890125", "Fiction"); // Skapar en ny bok med ett unikt ISBN
 
             // Act
-            bool result = library.AddBook(book);
+            bool result = library.AddBook(book); // Försöker lägga till boken i biblioteket
 
             // Assert
 
@@ -41,6 +41,31 @@
             // Assert
             Assert.False(result); // Kollar om boken inte lades till
             Assert.Equal(2, library.Books.Count); // Kollar om det fortfarande finns 2 böcker i biblioteket
+        }
+
+        [Fact]
+        public void Remove_Book_Should_Remove_Book_When_It_Exists_And_Not_Borrowed()
+        {
+            // Arrange
+            var library = CreateTestLibrary(); // Skapar ett testbibliotek med 2 böcker
+            string isbnToRemove = "1111111111111"; // ISBN för boken vi vill ta bort
+
+            // Lägg till en ny bok som INTE är utlånad och som vi kan ta bort
+            var bookToRemove = new Book("Boken att ta bort", "Test Författare", isbnToRemove, "Test") ;
+
+            // Lägg till boken i biblioteket
+            library.AddBook(bookToRemove);
+
+            // Antal böcker innan borttagning (förväntat 3: 2 från CreateTestLibrary + 1 vi la till)
+            int initialCount = library.Books.Count;
+
+            // Act
+            bool result = library.RemoveBook(isbnToRemove); // Försök ta bort boken
+
+            // Assert
+            Assert.True(result); // Kontrollera att borttagningen lyckades
+            Assert.Equal(initialCount - 1, library.Books.Count); // Kontrollera att antalet böcker minskat med 1
+            Assert.DoesNotContain(library.Books, b => b.ISBN == isbnToRemove); // Kontrollera att boken verkligen är borta
         }
     }
 }
