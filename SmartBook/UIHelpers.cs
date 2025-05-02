@@ -343,6 +343,14 @@
                 }
             }
         }
+
+        private static void DeleteAllBooksFromLibraryInMemoryAndJsonFile()
+        {
+            // Tar bort alla böcker i biblioteket
+            library.Books.Clear();
+            DisplaySuccess("Alla böcker har tagits bort från biblioteket (json och i minnet).");
+            PauseExecution();
+        }
         #endregion Hjälpmetoder
 
 
@@ -389,7 +397,7 @@
                             break;
 
                         case "8":
-                            library.Books.Clear();
+                            DeleteAllBooksFromLibraryInMemoryAndJsonFile();
                             break;
                         case "9":
                             AddDemoBooks();

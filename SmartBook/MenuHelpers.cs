@@ -11,20 +11,20 @@ namespace SmartBook
         public static void MainMenuUI()
         {
             Console.Clear();
-            Console.WriteLine("╔══════════════════════════════════╗");
-            Console.WriteLine("║   SmartBook - Bibliotekssystem   ║");
-            Console.WriteLine("╠══════════════════════════════════╣");
-            Console.WriteLine("║ 1. Lägg till bok                 ║");
-            Console.WriteLine("║ 2. Ta bort bok                   ║");
-            Console.WriteLine("║ 3. Visa alla böcker              ║");
-            Console.WriteLine("║ 4. Sök bok                       ║");
-            Console.WriteLine("║ 5. Låna / lämna tillbaka bok     ║");
-            Console.WriteLine("║ 6. Spara bibliotek till fil      ║");
-            Console.WriteLine("║ 7. Ladda bibliotek från fil      ║");
-            Console.WriteLine("║ 8. Radera biblioteket            ║");
-            Console.WriteLine("║ 9. Lägg till demo böcker         ║");
-            Console.WriteLine("║ 0. Avsluta                       ║");
-            Console.WriteLine("╚══════════════════════════════════╝");
+            Console.WriteLine("╔══════════════════════════════════════╗");
+            Console.WriteLine("║     SmartBook - Bibliotekssystem     ║");
+            Console.WriteLine("╠══════════════════════════════════════╣");
+            Console.WriteLine("║ 1. Lägg till bok                     ║");
+            Console.WriteLine("║ 2. Ta bort bok                       ║");
+            Console.WriteLine("║ 3. Visa alla böcker                  ║");
+            Console.WriteLine("║ 4. Sök bok                           ║");
+            Console.WriteLine("║ 5. Låna / lämna tillbaka bok         ║");
+            Console.WriteLine("║ 6. Spara bibliotek till fil          ║");
+            Console.WriteLine("║ 7. Ladda bibliotek från fil          ║");
+            Console.WriteLine("║ 8. Radera biblioteket (json + minne) ║");
+            Console.WriteLine("║ 9. Lägg till demo böcker             ║");
+            Console.WriteLine("║ 0. Avsluta                           ║");
+            Console.WriteLine("╚══════════════════════════════════════╝");
         }
 
         public static void AddBookUI()
