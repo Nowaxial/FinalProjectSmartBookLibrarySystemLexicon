@@ -367,9 +367,9 @@ FodyWeavers.xsd
 !FinalProjectSmartBookLibrarySystemLexicon/publish/**/*
 !FinalProjectSmartBookLibrarySystemLexicon/SmartBook/bin/publish
 !FinalProjectSmartBookLibrarySystemLexicon/SmartBook/bin/publish/**/*
-!/publish
+!publish
 !publish/**/*
 !Smartbook/bin/publish
 !Smartbook/bin/publish/**/*
-!/bin/publish
-!/bin/publish/**/*
+!bin/publish
+!bin/publish/**/*
