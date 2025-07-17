@@ -371,3 +371,5 @@ FodyWeavers.xsd
 !publish/**/*
 !Smartbook/bin/publish
 !Smartbook/bin/publish/**/*
+!/bin/publish
+!/bin/publish/**/*
