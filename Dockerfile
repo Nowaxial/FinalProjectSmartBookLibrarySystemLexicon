@@ -8,7 +8,7 @@ RUN apk add --no-cache ttyd
 WORKDIR /app
 
 # Kopiera hela publish-mappen
-COPY bin/Release/net9.0/ .
+COPY publish .
 
 # ttyd startar din app och exponerar port 7681
 EXPOSE 7681
