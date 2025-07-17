@@ -1,14 +1,15 @@
-#FROM mcr.microsoft.com/dotnet/runtime:9.0-alpine
-#WORKDIR /app
-#COPY publish/ .
-#RUN chmod +x /app/SmartBook
-#RUN apk add --no-cache ttyd
-#EXPOSE 7681
-#ENTRYPOINT ["ttyd","-W","-p","7681","/app/SmartBook"]
+# Använd en liten Alpine-bas med .NET 9 runtime
+FROM mcr.microsoft.com/dotnet/runtime:9.0-alpine AS runtime
 
+# Installera ttyd (statiskt byggd binär för Alpine)
+RUN apk add --no-cache ttyd
 
-# Dockerfile (Linux, enkel variant)
-FROM mcr.microsoft.com/dotnet/runtime:9.0 AS runtime
+# Arbetskatalog
 WORKDIR /app
-COPY bin/publish/ .
-ENTRYPOINT ["dotnet", "SmartBook.dll"]   # eller ./SmartBook om du publisera single-file exe
+
+# Kopiera hela publish-mappen
+COPY bin/Release/net9.0/ .
+
+# ttyd startar din app och exponerar port 7681
+EXPOSE 7681
+ENTRYPOINT ["ttyd", "-W", "-p", "7681", "./SmartBook"]
