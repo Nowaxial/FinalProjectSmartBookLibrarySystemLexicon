@@ -362,5 +362,8 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Tillåt endast bin/publish
-!bin/publish/
+# Men släpp igenom just publish-mappen
+!FinalProjectSmartBookLibrarySystemLexicon/publish/
+!FinalProjectSmartBookLibrarySystemLexicon/publish/**/*
+!/publish
+!publish/**/*
