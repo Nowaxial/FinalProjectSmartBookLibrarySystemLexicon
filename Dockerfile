@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/dotnet/runtime:9.0-alpine
 WORKDIR /app
-COPY /publish/ .
+COPY FinalProjectSmartBookLibrarySystemLexicon/publish/ .
 RUN chmod +x SmartBook
 RUN apk add --no-cache ttyd
 EXPOSE 7681
