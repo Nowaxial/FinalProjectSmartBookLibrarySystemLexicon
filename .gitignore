@@ -365,6 +365,8 @@ FodyWeavers.xsd
 # Men släpp igenom just publish-mappen
 !FinalProjectSmartBookLibrarySystemLexicon/publish/
 !FinalProjectSmartBookLibrarySystemLexicon/publish/**/*
+!FinalProjectSmartBookLibrarySystemLexicon/SmartBook/bin/publish
+!FinalProjectSmartBookLibrarySystemLexicon/SmartBook/bin/publish/**/*
 !/publish
 !publish/**/*
 !Smartbook/bin/publish
