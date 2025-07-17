@@ -1,16 +1,14 @@
-# 1. Liten Alpine-runtime
 FROM mcr.microsoft.com/dotnet/runtime:9.0-alpine AS runtime
 WORKDIR /app
 
-# 2. Kopiera hela publish-mappen
-COPY bin/publish/ .
+# Kopiera innehållet från din publish-mapp
+COPY FinalProjectSmartBookLibrarySystemLexicon/publish/ .
 
-# 3. Gör filen körbar (behövs på Linux)
-RUN chmod +x SmartBook
+# Gör filen körbar
+RUN chmod +x SmartBook.exe
 
-# 4. ttyd ger webb-terminal
+# Lägg till ttyd för webb-terminal
 RUN apk add --no-cache ttyd
 
-# 5. Exponera port 7681 och starta
 EXPOSE 7681
-ENTRYPOINT ["ttyd", "-W", "-p", "7681", "./SmartBook"]
+ENTRYPOINT ["ttyd", "-W", "-p", "7681", "./SmartBook.exe"]
