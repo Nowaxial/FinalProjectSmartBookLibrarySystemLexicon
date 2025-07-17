@@ -2,7 +2,8 @@ FROM mcr.microsoft.com/dotnet/runtime:9.0-alpine AS runtime
 WORKDIR /app
 
 # Kopiera innehållet från din publish-mapp
-COPY FinalProjectSmartBookLibrarySystemLexicon/publish/ .
+# COPY FinalProjectSmartBookLibrarySystemLexicon/publish/ .
+COPY /publish .
 
 # Gör filen körbar
 RUN chmod +x SmartBook.exe
