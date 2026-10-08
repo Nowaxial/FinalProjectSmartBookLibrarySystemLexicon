@@ -15,17 +15,24 @@ namespace SmartBook
             Books = [];
         }
 
-        public bool AddBook(Book book)
-        {
-            if (Books.Any(b => b.ISBN == book.ISBN))
-            {
-                UIHelpers.DisplayWarning($"En bok med samma ISBN: '{book.ISBN}' finns redan!");
-                return false;  // Returnera false för att indikera misslyckande
-            }
+public bool AddBook(Book book)
+{
+    if (!Book.IsValidIsbn(book.ISBN))
+    {
+        UIHelpers.DisplayWarning($"Ogiltigt ISBN: '{book.ISBN}' måste vara 13 siffror!");
+        return false;
+    }
 
-            Books.Add(book);
-            return true;  // Returnera true för att indikera lyckat tillägg
-        }
+    if (Books.Any(b => b.ISBN == book.ISBN))
+    {
+        UIHelpers.DisplayWarning($"En bok med samma ISBN: '{book.ISBN}' finns redan!");
+        return false;
+    }
+
+    Books.Add(book);
+    return true;
+}
+        
         public bool RemoveBook(string identifier)
         {
             var book = Books.FirstOrDefault(b =>
