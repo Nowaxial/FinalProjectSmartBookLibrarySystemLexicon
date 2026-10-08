@@ -13,4 +13,4 @@ RUN apt-get update && apt-get install -y wget \
   && chmod +x /usr/local/bin/ttyd \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 EXPOSE 7681
-CMD sh -c "ttyd -W -p ${PORT:-7681} dotnet SmartBook.dll"
+CMD sh -c "ttyd -W -p ${PORT:-7681} -t fontSize=20 -t titleFixed=SmartBook dotnet SmartBook.dll"
