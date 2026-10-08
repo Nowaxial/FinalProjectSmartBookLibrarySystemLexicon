@@ -184,14 +184,14 @@
             // Skapa en lista med demo böcker
             var demoBooks = new List<Book>
             {
-               new Book("Jag lever!", "Darth Sidious", "1234567890", "Psykologi") { IsBorrowed = true },
-               new Book("Lever jag?", "Han Solo", "0987654321", "Sci-fi"),
-               new Book("Hur ska jag leva?", "Darth Vader", "1122334455", "Filosofi") { IsBorrowed = true },
-               new Book("Lever du?", "Leia Organa", "2233445566", "Drama"),
-               new Book("Lever vi?", "Obi-Wan Kenobi", "3344556677", "Action") { IsBorrowed = true },
-               new Book("Lever de?", "Yoda", "4455667788", "Fantasy"),
-               new Book("Lever ni?", "Padmé Amidala", "5566778899", "Romantik") { IsBorrowed = true },
-               new Book("Lever hen?", "Chewbacca", "6677889900", "Äventyr"),
+                new Book("Jag lever!", "Darth Sidious", "9781234567890", "Psykologi") { IsBorrowed = true },
+                new Book("Lever jag?", "Han Solo", "9780987654321", "Sci-fi"),
+                new Book("Hur ska jag leva?", "Darth Vader", "9781122334455", "Filosofi") { IsBorrowed = true },
+                new Book("Lever du?", "Leia Organa", "9782233445566", "Drama"),
+                new Book("Lever vi?", "Obi-Wan Kenobi", "9783344556677", "Action") { IsBorrowed = true },
+                new Book("Lever de?", "Yoda", "9784455667788", "Fantasy"),
+                new Book("Lever ni?", "Padmé Amidala", "9785566778899", "Romantik") { IsBorrowed = true },
+                new Book("Lever hen?", "Chewbacca", "9786677889900", "Äventyr"),
             };
 
             // Räknar antalet böcker som finns innan vi lägger till nya
