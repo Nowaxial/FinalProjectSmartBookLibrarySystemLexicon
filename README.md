@@ -1,13 +1,16 @@
-﻿# SmartBook - Bibliotekssystem
+# SmartBook - Bibliotekssystem
 
 ## 📚 Beskrivning
 SmartBook är ett konsolbaserat bibliotekssystem för hantering av böcker. Programmet innehåller funktioner för att lägga till, ta bort, söka och hantera böcker, samt spara och ladda data till/från JSON-filer.
+
+**🚀 Testa live:** [SmartBook](https://smartbook-demo.onrender.com/)
+> Free-plan: första laddningen efter idle tar ~30–60 sek. Data nollställs vid omstart.
 
 ## 🛠️ Installation från GitHub
 
 1. **Clone'a projektet eller ladda ner**
    ```bash
-   git clone [repo-url] 
+   git clone https://github.com/Nowaxial/FinalProjectSmartBookLibrarySystemLexicon.git
    ```
    - Eller ladda ner ZIP-filen från GitHub och extrahera
 
@@ -15,10 +18,26 @@ SmartBook är ett konsolbaserat bibliotekssystem för hantering av böcker. Prog
    - Öppna `SmartBook.sln`
    - Bygg (`Ctrl+Shift+B`) och kör (`F5`)
 
+   Alternativ med terminal:
+   ```bash
+   dotnet run --project SmartBook/SmartBook.csproj
+   dotnet test
+   ```
+
+## 🌐 Kör online (Render)
+
+Appen körs med Docker + ttyd som webbterminal:
+
+```bash
+docker build -t smartbook .
+docker run -p 7681:7681 smartbook
+# öppna http://localhost:7681
+```
+
 ## ✔️ Testade funktioner (xUnit)
 
 ### 📖 Bokhantering
-- ISBN-validering (13 siffror)
+- ISBN-validering (13 siffror, både i UI och i `Library.AddBook()`)
 - Lägg till böcker (unik ISBN-kontroll)
 - Ta bort böcker (endast icke-utlånade)
 
@@ -35,8 +54,8 @@ SmartBook är ett konsolbaserat bibliotekssystem för hantering av böcker. Prog
 - **Sök bok**: Sök efter böcker baserat på titel, författare eller ISBN
 - **Låna/Återlämna bok**: Markera böcker som utlånade eller tillgängliga
 - **Spara/Ladda**: Spara hela biblioteket till JSON-fil eller ladda från befintlig fil
-- **Demo-data**: Lägg till testdata för enkel testning
-- **Radera bibliotek**: Rensar hela biblioteket (JSON Fil och minne)
+- **Demo-data**: Lägg till testdata med giltiga ISBN-13 för enkel testning
+- **Radera bibliotek**: Rensar biblioteket i minnet (filen skrivs över först vid nästa Spara)
 
 ## Teknisk implementation
 
@@ -70,23 +89,21 @@ Projektet innehåller xUnit-tester för både `Book`- och `Library`-klasser. Tes
 - Visa hela boklistan (sorterad efter titel)
 
 ### 🔍 Sökfunktioner
-- Sök böcker efter **exakt matchning** av:
-  - **Hela titeln** (t.ex. "Sagan om ringen")
-  - **Hela författarens namn** (t.ex. "J.R.R. Tolkien")
-  - **Hela ISBN-numret** (t.ex. "9780547928227")
-
-⚠️ **OBS**: Sökningen kräver exakt matchning - partiella matchningar (som "Sagan" eller "Tolk") fungerar inte. För att hitta en bok måste du ange hela söktermen korrekt.
+- Sök böcker med **partiell matchning** (case-insensitive) på:
+  - **Titel** (t.ex. "Sagan om ringen")
+  - **Författarens namn** (t.ex. "J.R.R. Tolkien")
+  - **ISBN-nummer** (t.ex. "9780547928227")
 
 Exempel:
 ```plaintext
-✅ Fungerar:   "Sagan om ringen" → hittar boken
-❌ Fungerar inte: "Sagan" → hittar inget
+✅ "Sagan om ringen" → hittar boken
+✅ "Sagan" → hittar också boken (del av titel)
 
-✅ Fungerar:   "J.R.R. Tolkien" → hittar författarens böcker
-❌ Fungerar inte: "Tolkien" → hittar inget
+✅ "J.R.R. Tolkien" → hittar författarens böcker
+✅ "Tolkien" → hittar också (del av namn)
 
-✅ Fungerar:   "9780547928227" → hittar boken med detta ISBN
-❌ Fungerar inte: "054792822" → hittar inget
+✅ "9780547928227" → hittar boken med detta ISBN
+✅ "054792822" → hittar också (del av ISBN)
 ```
 
 Tips: Använd funktionen "Visa alla böcker" för att se exakta titlar, författare och ISBN-nummer du kan söka efter.
@@ -100,21 +117,22 @@ Tips: Använd funktionen "Visa alla böcker" för att se exakta titlar, författ
 ### 💾 Datahantering
 - Spara hela biblioteket till JSON-fil
 - Ladda bibliotek från JSON-fil
-- Rensa hela biblioteket
+- Rensa biblioteket i minnet
 - Lägg till demodata för testning
 
 ## ❓ Hjälp
 Om du stöter på problem:
-1. Kontrollera att du har .NET 9.0 installerat
+1. Kontrollera att du har .NET 9.0 installerat (`dotnet --version`)
 2. Försök "Clean Solution" → "Rebuild Solution"
-3. Se till att `library.json` finns i `bin\Debug\net9.0\`
+3. `library.json` skapas i arbetsmappen där du kör programmet
 
 
 ## Begränsningar
 
 - Ingen användarhantering (alla användare delar samma bibliotek)
 - Ingen historik över utlåningar
-- Ingen avancerad sökning (ex. partiell matchning eller flera sökkriterier)
+- Ingen sökning på kategori / status eller flera filter kombinerat
+- Ingen persistens på Render Free (filen nollställs vid omstart)
 
 ## Framtida förbättringar
 
@@ -122,4 +140,3 @@ Om du stöter på problem:
 - Lägg till loggning av utlåningshistorik
 - Förbättra sökfunktionen med fler filter
 - Möjlighet att exportera rapporter (t.ex. utlånade böcker)
-# SmartBook
